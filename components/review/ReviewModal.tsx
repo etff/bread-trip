@@ -71,7 +71,7 @@ export default function ReviewModal({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 평점 선택 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
+          <label className="block text-sm font-semibold text-gray-800 mb-3 text-center">
             이 빵집은 어떠셨나요?
           </label>
           <div className="flex justify-center gap-2">
@@ -96,7 +96,7 @@ export default function ReviewModal({
             ))}
           </div>
           {rating > 0 && (
-            <p className="text-center text-sm text-gray-600 mt-2">
+            <p className="text-center text-sm text-gray-800 font-semibold mt-2">
               {rating === 1 && "별로예요"}
               {rating === 2 && "그저 그래요"}
               {rating === 3 && "괜찮아요"}
@@ -108,7 +108,7 @@ export default function ReviewModal({
 
         {/* 리뷰 내용 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-800 mb-2">
             리뷰 (선택)
           </label>
           <textarea
@@ -116,7 +116,7 @@ export default function ReviewModal({
             onChange={(e) => setComment(e.target.value)}
             placeholder="빵집에 대한 경험을 공유해주세요..."
             rows={4}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent resize-none"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent resize-none placeholder:text-gray-600 placeholder:font-medium text-gray-900 font-medium"
           />
         </div>
 

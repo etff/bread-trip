@@ -48,7 +48,7 @@ export default function ReviewCard({
             <h3 className="font-semibold text-brown truncate">
               {review.bakery.name}
             </h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-700 font-medium">
               <MapPin className="w-3 h-3 inline mr-1" />
               빵집 상세 보기
             </p>
@@ -71,10 +71,10 @@ export default function ReviewCard({
             )}
           </div>
           <div>
-            <p className="text-sm font-medium">
+            <p className="text-sm font-semibold text-gray-900">
               {review.user?.nickname || "익명"}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-700 font-medium">
               {formatDate(review.created_at)}
             </p>
           </div>
@@ -97,7 +97,7 @@ export default function ReviewCard({
 
       {/* 리뷰 내용 */}
       {review.comment && (
-        <p className="text-gray-700 text-sm leading-relaxed">
+        <p className="text-gray-900 text-sm leading-relaxed font-medium">
           {review.comment}
         </p>
       )}

@@ -131,7 +131,7 @@ export default function BakeryDetailPage() {
               {bakery.name}
             </h2>
             {bakery.district && (
-              <p className="text-gray-600">📍 {bakery.district}</p>
+              <p className="text-gray-700 font-semibold">📍 {bakery.district}</p>
             )}
           </div>
 
@@ -141,8 +141,8 @@ export default function BakeryDetailPage() {
               <div className="flex items-start gap-3">
                 <Croissant className="w-6 h-6 text-brown mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">대표 메뉴</p>
-                  <p className="font-semibold text-lg">{bakery.signature_bread}</p>
+                  <p className="text-sm text-gray-700 font-semibold mb-1">대표 메뉴</p>
+                  <p className="font-bold text-lg text-gray-900">{bakery.signature_bread}</p>
                 </div>
               </div>
             )}
@@ -151,8 +151,8 @@ export default function BakeryDetailPage() {
               <div className="flex items-start gap-3">
                 <MapPin className="w-6 h-6 text-brown mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">주소</p>
-                  <p className="font-medium">{bakery.address}</p>
+                  <p className="text-sm text-gray-700 font-semibold mb-1">주소</p>
+                  <p className="font-semibold text-gray-900">{bakery.address}</p>
                 </div>
               </div>
             </div>
@@ -160,16 +160,10 @@ export default function BakeryDetailPage() {
 
           {/* 리뷰 섹션 */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h3 className="font-bold text-lg">
                 리뷰 {reviews.length > 0 && `(${reviews.length})`}
               </h3>
-              <Button
-                size="sm"
-                onClick={() => setIsReviewModalOpen(true)}
-              >
-                리뷰 작성
-              </Button>
             </div>
 
             {reviews.length > 0 ? (
@@ -183,10 +177,10 @@ export default function BakeryDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-700 font-medium">
                 아직 리뷰가 없습니다
                 <br />
-                <span className="text-sm">첫 번째 리뷰를 남겨보세요!</span>
+                <span className="text-sm font-medium">첫 번째 리뷰를 남겨보세요!</span>
               </div>
             )}
           </div>

@@ -54,14 +54,14 @@ export default function BottomSheet({
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-8">
+        <div className="px-6 pb-24">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-brown mb-1">
                 {bakery.name}
               </h2>
-              <div className="flex items-center text-gray-600 text-sm">
+              <div className="flex items-center text-gray-700 text-sm font-medium">
                 <MapPin className="w-4 h-4 mr-1" />
                 {bakery.district || "서울"}
               </div>
@@ -70,7 +70,7 @@ export default function BottomSheet({
               onClick={onClose}
               className="p-2 hover:bg-cream rounded-lg transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-gray-700" />
             </button>
           </div>
 
@@ -95,8 +95,8 @@ export default function BottomSheet({
               <div className="flex items-center gap-2">
                 <Croissant className="w-5 h-5 text-brown" />
                 <div>
-                  <p className="text-sm text-gray-500">대표 메뉴</p>
-                  <p className="font-medium">{bakery.signature_bread}</p>
+                  <p className="text-sm text-gray-600 font-medium">대표 메뉴</p>
+                  <p className="font-semibold text-gray-900">{bakery.signature_bread}</p>
                 </div>
               </div>
             )}
@@ -104,29 +104,38 @@ export default function BottomSheet({
             <div className="flex items-start gap-2">
               <MapPin className="w-5 h-5 text-brown mt-0.5" />
               <div>
-                <p className="text-sm text-gray-500">주소</p>
-                <p className="font-medium">{bakery.address}</p>
+                <p className="text-sm text-gray-600 font-medium">주소</p>
+                <p className="font-semibold text-gray-900">{bakery.address}</p>
               </div>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => {
+                  // 카카오맵 길찾기
+                  window.open(
+                    `https://map.kakao.com/link/to/${bakery.name},${bakery.lat},${bakery.lng}`,
+                    "_blank"
+                  );
+                }}
+              >
+                길찾기
+              </Button>
+              <Button className="flex-1" onClick={() => onViewDetail(bakery)}>
+                리뷰보기
+              </Button>
+            </div>
             <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={() => {
-                // 카카오맵 길찾기
-                window.open(
-                  `https://map.kakao.com/link/to/${bakery.name},${bakery.lat},${bakery.lng}`,
-                  "_blank"
-                );
-              }}
+              variant="outline"
+              className="w-full"
+              onClick={() => onViewDetail(bakery)}
             >
-              길찾기
-            </Button>
-            <Button className="flex-1" onClick={() => onViewDetail(bakery)}>
-              자세히 보기
+              리뷰 작성
             </Button>
           </div>
         </div>

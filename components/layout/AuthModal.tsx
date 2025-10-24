@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { signInWithEmail } from "@/app/actions/auth";
+import { signUp, signIn } from "@/app/actions/auth";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,10 +13,14 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const router = useRouter();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,15 +28,41 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setIsLoading(true);
 
     try {
-      const result = await signInWithEmail(email);
+      if (mode === "signup") {
+        // 회원가입
+        if (!nickname.trim()) {
+          setError("닉네임을 입력해주세요.");
+          setIsLoading(false);
+          return;
+        }
 
-      if (result.error) {
-        setError(result.error);
+        const result = await signUp(email, password, nickname);
+
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setSuccess(true);
+          setTimeout(() => {
+            handleClose();
+            router.refresh();
+          }, 2000);
+        }
       } else {
-        setIsSent(true);
+        // 로그인
+        const result = await signIn(email, password);
+
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setSuccess(true);
+          setTimeout(() => {
+            handleClose();
+            router.refresh();
+          }, 1000);
+        }
       }
     } catch (err) {
-      setError("로그인 중 오류가 발생했습니다.");
+      setError("처리 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -39,53 +70,141 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const handleClose = () => {
     setEmail("");
-    setIsSent(false);
+    setPassword("");
+    setNickname("");
     setError("");
+    setSuccess(false);
+    setMode("signin");
     onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="로그인">
-      {isSent ? (
-        <div className="text-center py-4">
-          <div className="text-4xl mb-4">📧</div>
-          <h3 className="text-lg font-semibold mb-2">이메일을 확인하세요</h3>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={mode === "signin" ? "로그인" : "회원가입"}
+    >
+      {success ? (
+        <div className="text-center py-8">
+          <div className="text-5xl mb-4">🎉</div>
+          <h3 className="text-lg font-semibold mb-2">
+            {mode === "signin" ? "로그인 완료!" : "회원가입 완료!"}
+          </h3>
           <p className="text-gray-600 text-sm">
-            {email}로 로그인 링크를 보냈습니다.
-            <br />
-            이메일의 링크를 클릭하면 로그인됩니다.
+            {mode === "signin"
+              ? "환영합니다!"
+              : "빵지순례에 오신 것을 환영합니다!"}
           </p>
-          <Button onClick={handleClose} className="mt-6 w-full">
-            확인
-          </Button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <p className="text-gray-600 text-sm mb-4">
-            이메일 주소를 입력하면 로그인 링크를 보내드립니다.
-          </p>
+        <>
+          {/* 탭 */}
+          <div className="flex gap-2 mb-6 p-1 bg-cream rounded-lg">
+            <button
+              type="button"
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                mode === "signin"
+                  ? "bg-white text-brown shadow-sm"
+                  : "text-gray-600 hover:text-brown"
+              }`}
+              onClick={() => {
+                setMode("signin");
+                setError("");
+              }}
+            >
+              로그인
+            </button>
+            <button
+              type="button"
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                mode === "signup"
+                  ? "bg-white text-brown shadow-sm"
+                  : "text-gray-600 hover:text-brown"
+              }`}
+              onClick={() => {
+                setMode("signup");
+                setError("");
+              }}
+            >
+              회원가입
+            </button>
+          </div>
 
-          <Input
-            type="email"
-            label="이메일"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={error}
-            required
-            disabled={isLoading}
-          />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === "signup" && (
+              <Input
+                type="text"
+                label="닉네임"
+                placeholder="사용할 닉네임을 입력하세요"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "전송 중..." : "로그인 링크 받기"}
-          </Button>
+            <Input
+              type="email"
+              label="이메일"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
 
-          <p className="text-xs text-gray-500 text-center">
-            빵지순례가 처음이신가요?
-            <br />
-            자동으로 계정이 생성됩니다.
-          </p>
-        </form>
+            <Input
+              type="password"
+              label="비밀번호"
+              placeholder="6자 이상 입력하세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+              minLength={6}
+            />
+
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading
+                ? "처리 중..."
+                : mode === "signin"
+                ? "로그인"
+                : "회원가입"}
+            </Button>
+
+            <p className="text-xs text-gray-500 text-center">
+              {mode === "signin" ? (
+                <>
+                  계정이 없으신가요?{" "}
+                  <button
+                    type="button"
+                    className="text-brown font-medium hover:underline"
+                    onClick={() => setMode("signup")}
+                  >
+                    회원가입하기
+                  </button>
+                </>
+              ) : (
+                <>
+                  이미 계정이 있으신가요?{" "}
+                  <button
+                    type="button"
+                    className="text-brown font-medium hover:underline"
+                    onClick={() => setMode("signin")}
+                  >
+                    로그인하기
+                  </button>
+                </>
+              )}
+            </p>
+          </form>
+        </>
       )}
     </Modal>
   );

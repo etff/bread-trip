@@ -137,7 +137,7 @@ export default function NewBakeryPage() {
       {/* 폼 */}
       <div className="max-w-screen-md mx-auto px-4 py-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <p className="text-gray-600 text-sm mb-6">
+          <p className="text-gray-800 text-sm mb-6 font-semibold">
             새로운 빵집을 발견하셨나요? 다른 빵지러들과 공유해보세요!
           </p>
 
@@ -155,7 +155,7 @@ export default function NewBakeryPage() {
 
             {/* 주소 검색 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
                 주소 검색 *
               </label>
 
@@ -210,7 +210,7 @@ export default function NewBakeryPage() {
 
             {/* 지역 선택 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
                 지역
               </label>
               <select
@@ -221,7 +221,7 @@ export default function NewBakeryPage() {
                     district: e.target.value as District,
                   })
                 }
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent text-gray-900 font-medium"
               >
                 <option value="">지역을 선택하세요</option>
                 {districts.map((district) => (
@@ -244,7 +244,7 @@ export default function NewBakeryPage() {
 
             {/* 이미지 업로드 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
                 대표 이미지
               </label>
               <ImageUpload
