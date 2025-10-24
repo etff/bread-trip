@@ -53,9 +53,7 @@ export async function uploadReviewImage(file: File): Promise<string> {
     });
 
   if (error) {
-    console.error("이미지 업로드 실패 - 전체 에러:", error);
-    console.error("에러 메시지:", error.message);
-    console.error("에러 상태:", error.statusCode);
+    console.error("이미지 업로드 실패:", error);
     throw new Error(`업로드 실패: ${error.message}`);
   }
 
