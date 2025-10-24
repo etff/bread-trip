@@ -45,10 +45,8 @@ export default function KakaoMap({
 
         const mapInstance = new window.kakao.maps.Map(container, options);
         setMap(mapInstance);
-        console.log("✅ Kakao Map initialized successfully!");
         return true;
       } catch (error) {
-        console.error("❌ Error initializing map:", error);
         return false;
       }
     };
@@ -59,7 +57,6 @@ export default function KakaoMap({
     } else {
       // 'kakao-maps-ready' 이벤트를 기다림
       const handleReady = () => {
-        console.log("✅ Kakao Maps ready event received");
         initMap();
       };
 
@@ -73,11 +70,9 @@ export default function KakaoMap({
         attempts++;
 
         if (window.kakao && window.kakao.maps && window.kakao.maps.LatLng) {
-          console.log("✅ Kakao Maps SDK ready (via polling)");
           clearInterval(checkKakao);
           initMap();
         } else if (attempts >= maxAttempts) {
-          console.error("❌ Kakao Maps SDK failed to initialize after 5 seconds");
           clearInterval(checkKakao);
         }
       }, 100);

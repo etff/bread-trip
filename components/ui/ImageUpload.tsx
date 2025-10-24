@@ -7,11 +7,13 @@ import { uploadBakeryImage } from "@/lib/supabase/storage";
 interface ImageUploadProps {
   onUploadComplete: (url: string) => void;
   currentImage?: string;
+  uploadFunction?: (file: File) => Promise<string>;
 }
 
 export default function ImageUpload({
   onUploadComplete,
   currentImage,
+  uploadFunction = uploadBakeryImage,
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
@@ -43,7 +45,7 @@ export default function ImageUpload({
     // 업로드
     setIsUploading(true);
     try {
-      const url = await uploadBakeryImage(file);
+      const url = await uploadFunction(file);
       onUploadComplete(url);
     } catch (error) {
       alert("이미지 업로드에 실패했습니다.");

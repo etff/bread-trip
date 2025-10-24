@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
+import ImageUpload from "@/components/ui/ImageUpload";
+import { uploadReviewImage } from "@/lib/supabase/storage";
 import { cn } from "@/lib/utils";
 import type { Bakery } from "@/types/common";
 
@@ -23,6 +25,7 @@ export default function ReviewModal({
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +48,7 @@ export default function ReviewModal({
           bakery_id: bakery.id,
           rating,
           comment,
+          photo_url: photoUrl || undefined,
         }),
       });
 
@@ -54,6 +58,7 @@ export default function ReviewModal({
         alert("리뷰가 등록되었습니다!");
         setRating(0);
         setComment("");
+        setPhotoUrl("");
         onSuccess?.();
         onClose();
       } else {
@@ -104,6 +109,18 @@ export default function ReviewModal({
               {rating === 5 && "최고예요!"}
             </p>
           )}
+        </div>
+
+        {/* 사진 업로드 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 mb-2">
+            사진 (선택)
+          </label>
+          <ImageUpload
+            onUploadComplete={setPhotoUrl}
+            currentImage={photoUrl}
+            uploadFunction={uploadReviewImage}
+          />
         </div>
 
         {/* 리뷰 내용 */}
