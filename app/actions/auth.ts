@@ -94,7 +94,7 @@ export async function getUser() {
 
   return {
     ...user,
-    nickname: profile?.nickname,
-    profile_image_url: profile?.profile_image_url,
+    nickname: (profile as any)?.nickname,
+    profile_image_url: (profile as any)?.profile_image_url,
   };
 }
