@@ -59,7 +59,7 @@ export default function ReviewCard({
       {/* 사용자 정보 & 평점 */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-cream flex items-center justify-center text-sm">
+          <div className="w-8 h-8 rounded-full bg-cream flex items-center justify-center text-sm overflow-hidden">
             {review.user?.profile_image_url ? (
               <img
                 src={review.user.profile_image_url}
@@ -67,7 +67,11 @@ export default function ReviewCard({
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              "🍞"
+              <img
+                src="/mascot.png"
+                alt="빵지순례 마스코트"
+                className="w-6 h-6 object-contain"
+              />
             )}
           </div>
           <div>

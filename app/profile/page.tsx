@@ -50,8 +50,20 @@ export default function ProfilePage() {
             {/* 프로필 카드 */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center text-2xl">
-                  🍞
+                <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center overflow-hidden">
+                  {user.profile_image_url ? (
+                    <img
+                      src={user.profile_image_url}
+                      alt={user.nickname || "프로필"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src="/mascot.png"
+                      alt="빵지순례 마스코트"
+                      className="w-12 h-12 object-contain"
+                    />
+                  )}
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-gray-900">

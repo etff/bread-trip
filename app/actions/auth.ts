@@ -78,23 +78,34 @@ export async function signOut() {
 }
 
 export async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) return null;
+    if (!user) return null;
 
-  // users 테이블에서 프로필 정보 가져오기
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+    // users 테이블에서 프로필 정보 가져오기
+    const { data: profile, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-  return {
-    ...user,
-    nickname: (profile as any)?.nickname,
-    profile_image_url: (profile as any)?.profile_image_url,
-  };
+    if (error) {
+      console.error("프로필 조회 실패:", error);
+      // 프로필이 없어도 기본 user 정보는 반환
+      return user;
+    }
+
+    return {
+      ...user,
+      nickname: (profile as any)?.nickname,
+      profile_image_url: (profile as any)?.profile_image_url,
+    };
+  } catch (error) {
+    console.error("getUser 에러:", error);
+    return null;
+  }
 }

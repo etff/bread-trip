@@ -5,9 +5,11 @@ import { updateSession } from "@/lib/supabase/middleware";
  * Next.js Proxy
  * 모든 요청에 대해 Supabase 세션을 갱신합니다.
  */
-export default async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
+
+export default proxy;
 
 export const config = {
   matcher: [
