@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import KakaoMap from "@/components/map/KakaoMap";
 import BottomSheet from "@/components/map/BottomSheet";
 import type { Bakery } from "@/types/common";
@@ -51,14 +52,16 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen w-full relative">
+    <div className="fixed inset-0 w-full h-full">
       {/* 지도 */}
-      <KakaoMap
-        bakeries={bakeries}
-        onMarkerClick={handleMarkerClick}
-        center={{ lat: 37.5665, lng: 126.9780 }}
-        level={7}
-      />
+      <div className="absolute inset-0">
+        <KakaoMap
+          bakeries={bakeries}
+          onMarkerClick={handleMarkerClick}
+          center={{ lat: 37.5665, lng: 126.9780 }}
+          level={7}
+        />
+      </div>
 
       {/* 상단 배너 */}
       <div className="absolute top-4 left-4 right-4 z-10">
@@ -76,6 +79,14 @@ export default function Home() {
         onClose={() => setSelectedBakery(null)}
         onViewDetail={handleViewDetail}
       />
+
+      {/* FAB - 빵집 등록 버튼 */}
+      <button
+        onClick={() => router.push("/bakeries/new")}
+        className="fixed right-4 bottom-20 z-20 w-14 h-14 bg-brown text-white rounded-full shadow-lg hover:bg-brown/90 transition-all hover:scale-110 flex items-center justify-center"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
     </div>
   );
 }

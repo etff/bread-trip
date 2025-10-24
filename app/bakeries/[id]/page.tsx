@@ -4,18 +4,23 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Croissant, Heart } from "lucide-react";
 import Button from "@/components/ui/Button";
-import type { Bakery } from "@/types/common";
+import ReviewModal from "@/components/review/ReviewModal";
+import ReviewCard from "@/components/review/ReviewCard";
+import type { Bakery, ReviewWithUser } from "@/types/common";
 
 export default function BakeryDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [bakery, setBakery] = useState<Bakery | null>(null);
+  const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (params.id) {
       fetchBakery(params.id as string);
+      fetchReviews(params.id as string);
     }
   }, [params.id]);
 
@@ -31,6 +36,19 @@ export default function BakeryDetailPage() {
       console.error("빵집 정보 로드 실패:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchReviews = async (bakeryId: string) => {
+    try {
+      const response = await fetch(`/api/reviews?bakeryId=${bakeryId}`);
+      const data = await response.json();
+
+      if (data.reviews) {
+        setReviews(data.reviews);
+      }
+    } catch (error) {
+      console.error("리뷰 로드 실패:", error);
     }
   };
 
@@ -142,12 +160,35 @@ export default function BakeryDetailPage() {
 
           {/* 리뷰 섹션 */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-lg mb-4">리뷰</h3>
-            <div className="text-center py-8 text-gray-500">
-              아직 리뷰가 없습니다
-              <br />
-              <span className="text-sm">첫 번째 리뷰를 남겨보세요!</span>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">
+                리뷰 {reviews.length > 0 && `(${reviews.length})`}
+              </h3>
+              <Button
+                size="sm"
+                onClick={() => setIsReviewModalOpen(true)}
+              >
+                리뷰 작성
+              </Button>
             </div>
+
+            {reviews.length > 0 ? (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    showBakery={false}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                아직 리뷰가 없습니다
+                <br />
+                <span className="text-sm">첫 번째 리뷰를 남겨보세요!</span>
+              </div>
+            )}
           </div>
 
           {/* 액션 버튼 */}
@@ -163,17 +204,24 @@ export default function BakeryDetailPage() {
             >
               길찾기
             </Button>
-            <Button
-              onClick={() => {
-                // TODO: 리뷰 작성 모달 열기
-                alert("리뷰 작성 기능은 곧 추가됩니다!");
-              }}
-            >
+            <Button onClick={() => setIsReviewModalOpen(true)}>
               리뷰 작성
             </Button>
           </div>
         </div>
       </div>
+
+      {/* 리뷰 작성 모달 */}
+      {bakery && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          bakery={bakery}
+          onSuccess={() => {
+            fetchReviews(bakery.id);
+          }}
+        />
+      )}
     </div>
   );
 }

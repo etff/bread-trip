@@ -1,4 +1,34 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import ReviewCard from "@/components/review/ReviewCard";
+import type { ReviewWithUser, ReviewWithBakery } from "@/types/common";
+
 export default function FeedPage() {
+  const [reviews, setReviews] = useState<
+    (ReviewWithUser & ReviewWithBakery)[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch("/api/reviews");
+      const data = await response.json();
+
+      if (data.reviews) {
+        setReviews(data.reviews);
+      }
+    } catch (error) {
+      console.error("리뷰 로드 실패:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-warm">
       <div className="max-w-screen-md mx-auto px-4 py-8">
@@ -10,25 +40,23 @@ export default function FeedPage() {
           </p>
         </div>
 
-        {/* 필터 탭 */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          {["전체", "성수", "망원", "홍대", "이태원", "강남"].map((tab) => (
-            <button
-              key={tab}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                tab === "전체"
-                  ? "bg-brown text-white"
-                  : "bg-white text-gray-600 hover:bg-cream"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* 피드 리스트 */}
-        <div className="space-y-4">
-          {/* 빈 상태 */}
+        {/* 로딩 */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="text-4xl mb-2 animate-bounce">🍞</div>
+              <p className="text-brown font-medium">로딩 중...</p>
+            </div>
+          </div>
+        ) : reviews.length > 0 ? (
+          /* 리뷰 리스트 */
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} showBakery={true} />
+            ))}
+          </div>
+        ) : (
+          /* 빈 상태 */
           <div className="bg-white rounded-2xl p-12 shadow-sm text-center">
             <div className="text-6xl mb-4">🍞</div>
             <h2 className="text-xl font-bold mb-2">아직 리뷰가 없습니다</h2>
@@ -36,7 +64,7 @@ export default function FeedPage() {
               첫 번째로 빵집을 탐험하고 리뷰를 남겨보세요!
             </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

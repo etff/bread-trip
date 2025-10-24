@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import type { BakeryInsert } from "@/types/common";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -68,18 +69,20 @@ export async function POST(request: Request) {
     }
 
     // 빵집 등록
+    const bakeryData: BakeryInsert = {
+      name,
+      address,
+      district,
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      signature_bread,
+      image_url,
+      created_by: user.id,
+    };
+
     const { data, error } = await supabase
       .from("bakeries")
-      .insert({
-        name,
-        address,
-        district,
-        lat,
-        lng,
-        signature_bread,
-        image_url,
-        created_by: user.id,
-      })
+      .insert(bakeryData as any)
       .select()
       .single();
 

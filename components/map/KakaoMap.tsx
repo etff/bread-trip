@@ -17,18 +17,27 @@ export default function KakaoMap({
   level = 7,
 }: KakaoMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<kakao.maps.Map | null>(null);
-  const markersRef = useRef<kakao.maps.Marker[]>([]);
+  const [map, setMap] = useState<any>(null);
+  const markersRef = useRef<any[]>([]);
 
   // 지도 초기화
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current) {
+      return;
+    }
 
     const initMap = () => {
-      window.kakao.maps.load(() => {
-        const container = mapRef.current;
-        if (!container) return;
+      const container = mapRef.current;
+      if (
+        !container ||
+        !window.kakao ||
+        !window.kakao.maps ||
+        !window.kakao.maps.LatLng
+      ) {
+        return false;
+      }
 
+      try {
         const options = {
           center: new window.kakao.maps.LatLng(center.lat, center.lng),
           level,
@@ -36,22 +45,47 @@ export default function KakaoMap({
 
         const mapInstance = new window.kakao.maps.Map(container, options);
         setMap(mapInstance);
-      });
+        console.log("✅ Kakao Map initialized successfully!");
+        return true;
+      } catch (error) {
+        console.error("❌ Error initializing map:", error);
+        return false;
+      }
     };
 
-    // Kakao Maps SDK가 이미 로드되었는지 확인
-    if (window.kakao && window.kakao.maps) {
+    // Kakao Maps SDK가 완전히 초기화되었는지 확인
+    if (window.kakao && window.kakao.maps && window.kakao.maps.LatLng) {
       initMap();
     } else {
-      // SDK 로드 대기
+      // 'kakao-maps-ready' 이벤트를 기다림
+      const handleReady = () => {
+        console.log("✅ Kakao Maps ready event received");
+        initMap();
+      };
+
+      window.addEventListener("kakao-maps-ready", handleReady);
+
+      // 폴백: 이벤트를 놓쳤을 경우를 대비한 polling
+      let attempts = 0;
+      const maxAttempts = 50;
+
       const checkKakao = setInterval(() => {
-        if (window.kakao && window.kakao.maps) {
+        attempts++;
+
+        if (window.kakao && window.kakao.maps && window.kakao.maps.LatLng) {
+          console.log("✅ Kakao Maps SDK ready (via polling)");
           clearInterval(checkKakao);
           initMap();
+        } else if (attempts >= maxAttempts) {
+          console.error("❌ Kakao Maps SDK failed to initialize after 5 seconds");
+          clearInterval(checkKakao);
         }
       }, 100);
 
-      return () => clearInterval(checkKakao);
+      return () => {
+        window.removeEventListener("kakao-maps-ready", handleReady);
+        clearInterval(checkKakao);
+      };
     }
   }, [center.lat, center.lng, level]);
 
@@ -131,7 +165,7 @@ export default function KakaoMap({
     <div
       ref={mapRef}
       className="w-full h-full"
-      style={{ minHeight: "400px" }}
+      style={{ width: "100%", height: "100%" }}
     />
   );
 }
