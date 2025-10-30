@@ -4,16 +4,26 @@ import { useState, useEffect } from "react";
 import { LogOut } from "lucide-react";
 import Button from "@/components/ui/Button";
 import AuthModal from "@/components/layout/AuthModal";
+import ReviewCard from "@/components/review/ReviewCard";
 import { signOut, getUser } from "@/app/actions/auth";
+import type { ReviewWithUser, ReviewWithBakery } from "@/types/common";
 
 export default function ProfilePage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [reviews, setReviews] = useState<(ReviewWithUser & ReviewWithBakery)[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   useEffect(() => {
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserReviews();
+    }
+  }, [user?.id]);
 
   const fetchUser = async () => {
     try {
@@ -23,6 +33,21 @@ export default function ProfilePage() {
       console.error("사용자 정보 로드 실패:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUserReviews = async () => {
+    if (!user?.id) return;
+
+    setReviewsLoading(true);
+    try {
+      const response = await fetch(`/api/reviews?userId=${user.id}`);
+      const data = await response.json();
+      setReviews(data.reviews || []);
+    } catch (error) {
+      console.error("리뷰 로드 실패:", error);
+    } finally {
+      setReviewsLoading(false);
     }
   };
 
@@ -79,10 +104,35 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-800 font-bold">찜한 빵집</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-brown">0</p>
+                  <p className="text-2xl font-bold text-brown">
+                    {reviewsLoading ? "..." : reviews.length}
+                  </p>
                   <p className="text-sm text-gray-800 font-bold">작성한 리뷰</p>
                 </div>
               </div>
+            </div>
+
+            {/* 작성한 리뷰 섹션 */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-bold text-gray-900 mb-4">작성한 리뷰</h3>
+              {reviewsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="text-4xl mb-2 animate-bounce">🍞</div>
+                    <p className="text-gray-800 font-medium">로딩 중...</p>
+                  </div>
+                </div>
+              ) : reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} showBakery={true} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-800 font-semibold">
+                  아직 작성한 리뷰가 없습니다
+                </div>
+              )}
             </div>
 
             {/* 찜한 빵집 섹션 */}

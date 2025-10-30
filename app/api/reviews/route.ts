@@ -5,6 +5,7 @@ import type { ReviewInsert } from "@/types/common";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const bakeryId = searchParams.get("bakeryId");
+  const userId = searchParams.get("userId");
   const limit = parseInt(searchParams.get("limit") || "20");
   const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -26,6 +27,11 @@ export async function GET(request: Request) {
     // 특정 빵집의 리뷰만 조회
     if (bakeryId) {
       query = query.eq("bakery_id", bakeryId);
+    }
+
+    // 특정 사용자의 리뷰만 조회
+    if (userId) {
+      query = query.eq("user_id", userId);
     }
 
     const { data, error } = await query;
