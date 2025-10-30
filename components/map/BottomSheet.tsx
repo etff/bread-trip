@@ -42,7 +42,8 @@ export default function BottomSheet({
       {/* Bottom Sheet */}
       <div
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50",
+          "fixed bottom-0 left-1/2 -translate-x-1/2 z-50",
+          "w-full max-w-lg mx-4",
           "bg-white rounded-t-3xl shadow-2xl",
           "max-h-[80vh] overflow-y-auto",
           "animate-in slide-in-from-bottom-full duration-300"
@@ -76,7 +77,7 @@ export default function BottomSheet({
 
           {/* Image */}
           {bakery.image_url ? (
-            <div className="w-full h-48 bg-cream rounded-xl mb-4 overflow-hidden">
+            <div className="w-full aspect-[4/3] bg-cream rounded-xl mb-4 overflow-hidden">
               <img
                 src={bakery.image_url}
                 alt={bakery.name}
@@ -84,7 +85,7 @@ export default function BottomSheet({
               />
             </div>
           ) : (
-            <div className="w-full h-48 bg-cream rounded-xl mb-4 flex items-center justify-center">
+            <div className="w-full aspect-[4/3] bg-cream rounded-xl mb-4 flex items-center justify-center">
               <span className="text-6xl">🍞</span>
             </div>
           )}
