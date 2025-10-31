@@ -8,10 +8,12 @@ import type { Database } from "./database";
 export type User = Database["public"]["Tables"]["users"]["Row"];
 export type Bakery = Database["public"]["Tables"]["bakeries"]["Row"];
 export type Review = Database["public"]["Tables"]["reviews"]["Row"];
+export type Favorite = Database["public"]["Tables"]["favorites"]["Row"];
 
 // Insert 타입
 export type BakeryInsert = Database["public"]["Tables"]["bakeries"]["Insert"];
 export type ReviewInsert = Database["public"]["Tables"]["reviews"]["Insert"];
+export type FavoriteInsert = Database["public"]["Tables"]["favorites"]["Insert"];
 
 // 확장된 타입 (Join 포함)
 export type BakeryWithReviews = Bakery & {

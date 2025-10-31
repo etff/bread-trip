@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-import { X, MapPin, Croissant } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, MapPin, Croissant, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Bakery } from "@/types/common";
 import Button from "@/components/ui/Button";
+import { addFavorite, removeFavorite, isFavorite } from "@/app/actions/favorites";
 
 interface BottomSheetProps {
   bakery: Bakery | null;
@@ -17,9 +18,15 @@ export default function BottomSheet({
   onClose,
   onViewDetail,
 }: BottomSheetProps) {
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
+
   useEffect(() => {
     if (bakery) {
       document.body.style.overflow = "hidden";
+
+      // 찜 상태 확인
+      checkFavoriteStatus();
     } else {
       document.body.style.overflow = "unset";
     }
@@ -28,6 +35,39 @@ export default function BottomSheet({
       document.body.style.overflow = "unset";
     };
   }, [bakery]);
+
+  const checkFavoriteStatus = async () => {
+    if (!bakery) return;
+
+    const result = await isFavorite(bakery.id);
+    setIsFavorited(result.isFavorite);
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!bakery || isLoadingFavorite) return;
+
+    setIsLoadingFavorite(true);
+
+    try {
+      if (isFavorited) {
+        const result = await removeFavorite(bakery.id);
+        if (result.error) {
+          alert(result.error);
+        } else {
+          setIsFavorited(false);
+        }
+      } else {
+        const result = await addFavorite(bakery.id);
+        if (result.error) {
+          alert(result.error);
+        } else {
+          setIsFavorited(true);
+        }
+      }
+    } finally {
+      setIsLoadingFavorite(false);
+    }
+  };
 
   if (!bakery) return null;
 
@@ -67,12 +107,32 @@ export default function BottomSheet({
                 {bakery.district || "서울"}
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-cream rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-700" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleToggleFavorite}
+                disabled={isLoadingFavorite}
+                className={cn(
+                  "p-2 rounded-lg transition-all",
+                  isFavorited
+                    ? "bg-red-50 hover:bg-red-100 text-red-500"
+                    : "hover:bg-cream text-gray-400 hover:text-red-500",
+                  isLoadingFavorite && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <Heart
+                  className={cn(
+                    "w-5 h-5 transition-all",
+                    isFavorited && "fill-current"
+                  )}
+                />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-cream rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-700" />
+              </button>
+            </div>
           </div>
 
           {/* Image */}

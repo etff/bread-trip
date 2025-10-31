@@ -58,6 +58,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           setSuccess(true);
           setTimeout(() => {
             handleClose();
+            router.push('/');
             router.refresh();
           }, 1000);
         }

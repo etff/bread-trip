@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, Heart, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import AuthModal from "@/components/layout/AuthModal";
 import ReviewCard from "@/components/review/ReviewCard";
 import { signOut, getUser } from "@/app/actions/auth";
+import { getFavorites } from "@/app/actions/favorites";
 import type { ReviewWithUser, ReviewWithBakery } from "@/types/common";
 
 export default function ProfilePage() {
@@ -14,6 +16,8 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [reviews, setReviews] = useState<(ReviewWithUser & ReviewWithBakery)[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [favoritesCount, setFavoritesCount] = useState(0);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -22,6 +26,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.id) {
       fetchUserReviews();
+      fetchFavoritesCount();
     }
   }, [user?.id]);
 
@@ -48,6 +53,18 @@ export default function ProfilePage() {
       console.error("리뷰 로드 실패:", error);
     } finally {
       setReviewsLoading(false);
+    }
+  };
+
+  const fetchFavoritesCount = async () => {
+    setFavoritesLoading(true);
+    try {
+      const result = await getFavorites();
+      setFavoritesCount(result.data?.length || 0);
+    } catch (error) {
+      console.error("찜 목록 로드 실패:", error);
+    } finally {
+      setFavoritesLoading(false);
     }
   };
 
@@ -99,11 +116,16 @@ export default function ProfilePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-brown">0</p>
+                <Link
+                  href="/favorites"
+                  className="text-center hover:bg-cream p-2 rounded-lg transition-colors"
+                >
+                  <p className="text-2xl font-bold text-brown">
+                    {favoritesLoading ? "..." : favoritesCount}
+                  </p>
                   <p className="text-sm text-gray-800 font-bold">찜한 빵집</p>
-                </div>
-                <div className="text-center">
+                </Link>
+                <div className="text-center p-2">
                   <p className="text-2xl font-bold text-brown">
                     {reviewsLoading ? "..." : reviews.length}
                   </p>
@@ -136,12 +158,23 @@ export default function ProfilePage() {
             </div>
 
             {/* 찜한 빵집 섹션 */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-4">찜한 빵집</h3>
-              <div className="text-center py-8 text-gray-800 font-semibold">
-                아직 찜한 빵집이 없습니다
+            <Link
+              href="/favorites"
+              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow block"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                  <h3 className="font-bold text-gray-900">찜한 빵집</h3>
+                </div>
+                <div className="flex items-center gap-1 text-gray-500">
+                  <span className="text-sm font-medium">
+                    {favoritesLoading ? "..." : `${favoritesCount}개`}
+                  </span>
+                  <ChevronRight className="w-5 h-5" />
+                </div>
               </div>
-            </div>
+            </Link>
 
             {/* 로그아웃 버튼 */}
             <Button
