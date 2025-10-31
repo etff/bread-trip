@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import KakaoMap from "@/components/map/KakaoMap";
 import BottomSheet from "@/components/map/BottomSheet";
+import AuthModal from "@/components/layout/AuthModal";
+import { getUser } from "@/app/actions/auth";
 import type { Bakery } from "@/types/common";
 
 export default function Home() {
@@ -12,6 +14,7 @@ export default function Home() {
   const [bakeries, setBakeries] = useState<Bakery[]>([]);
   const [selectedBakery, setSelectedBakery] = useState<Bakery | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     fetchBakeries();
@@ -38,6 +41,15 @@ export default function Home() {
 
   const handleViewDetail = (bakery: Bakery) => {
     router.push(`/bakeries/${bakery.id}`);
+  };
+
+  const handleAddBakeryClick = async () => {
+    const user = await getUser();
+    if (user) {
+      router.push("/bakeries/new");
+    } else {
+      setIsAuthModalOpen(true);
+    }
   };
 
   if (isLoading) {
