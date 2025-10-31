@@ -6,6 +6,7 @@ import { ArrowLeft, MapPin, Croissant, Heart } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ReviewModal from "@/components/review/ReviewModal";
 import ReviewCard from "@/components/review/ReviewCard";
+import { getUser } from "@/app/actions/auth";
 import type { Bakery, ReviewWithUser } from "@/types/common";
 
 export default function BakeryDetailPage() {
@@ -16,13 +17,20 @@ export default function BakeryDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (params.id) {
       fetchBakery(params.id as string);
       fetchReviews(params.id as string);
+      checkLoginStatus();
     }
   }, [params.id]);
+
+  const checkLoginStatus = async () => {
+    const user = await getUser();
+    setIsLoggedIn(!!user);
+  };
 
   const fetchBakery = async (id: string) => {
     try {
@@ -193,7 +201,7 @@ export default function BakeryDetailPage() {
           </div>
 
           {/* 액션 버튼 */}
-          <div className="grid grid-cols-2 gap-3 pb-6">
+          <div className={`grid ${isLoggedIn ? 'grid-cols-2' : 'grid-cols-1'} gap-3 pb-6`}>
             <Button
               variant="secondary"
               onClick={() => {
@@ -205,9 +213,11 @@ export default function BakeryDetailPage() {
             >
               길찾기
             </Button>
-            <Button onClick={() => setIsReviewModalOpen(true)}>
-              리뷰 작성
-            </Button>
+            {isLoggedIn && (
+              <Button onClick={() => setIsReviewModalOpen(true)}>
+                리뷰 작성
+              </Button>
+            )}
           </div>
         </div>
       </div>

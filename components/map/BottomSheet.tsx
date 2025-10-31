@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { Bakery } from "@/types/common";
 import Button from "@/components/ui/Button";
 import { addFavorite, removeFavorite, isFavorite } from "@/app/actions/favorites";
+import { getUser } from "@/app/actions/auth";
 
 interface BottomSheetProps {
   bakery: Bakery | null;
@@ -20,12 +21,14 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (bakery) {
       document.body.style.overflow = "hidden";
 
-      // 찜 상태 확인
+      // 로그인 상태 및 찜 상태 확인
+      checkLoginStatus();
       checkFavoriteStatus();
     } else {
       document.body.style.overflow = "unset";
@@ -35,6 +38,11 @@ export default function BottomSheet({
       document.body.style.overflow = "unset";
     };
   }, [bakery]);
+
+  const checkLoginStatus = async () => {
+    const user = await getUser();
+    setIsLoggedIn(!!user);
+  };
 
   const checkFavoriteStatus = async () => {
     if (!bakery) return;
@@ -198,13 +206,15 @@ export default function BottomSheet({
                 리뷰보기
               </Button>
             </div>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => onViewDetail(bakery)}
-            >
-              리뷰 작성
-            </Button>
+            {isLoggedIn && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => onViewDetail(bakery)}
+              >
+                리뷰 작성
+              </Button>
+            )}
           </div>
         </div>
       </div>
