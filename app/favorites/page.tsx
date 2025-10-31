@@ -16,7 +16,7 @@ export default async function FavoritesPage() {
   }
 
   // 찜한 빵집 목록 조회
-  const { data: favorites } = await supabase
+  const { data: favorites } = await (supabase as any)
     .from("favorites")
     .select(
       `

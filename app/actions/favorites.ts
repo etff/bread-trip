@@ -19,7 +19,7 @@ export async function addFavorite(bakeryId: string) {
   }
 
   // 이미 찜했는지 확인
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("favorites")
     .select("id")
     .eq("user_id", user.id)
@@ -31,12 +31,12 @@ export async function addFavorite(bakeryId: string) {
   }
 
   // 찜하기 추가
-  const favoriteData: FavoriteInsert = {
-    user_id: user.id,
-    bakery_id: bakeryId,
-  };
-
-  const { error } = await supabase.from("favorites").insert(favoriteData);
+  const { error } = await (supabase as any)
+    .from("favorites")
+    .insert({
+      user_id: user.id,
+      bakery_id: bakeryId,
+    });
 
   if (error) {
     console.error("찜하기 추가 오류:", error);
@@ -62,7 +62,7 @@ export async function removeFavorite(bakeryId: string) {
   }
 
   // 찜 취소
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from("favorites")
     .delete()
     .eq("user_id", user.id)
@@ -90,7 +90,7 @@ export async function isFavorite(bakeryId: string) {
     return { isFavorite: false };
   }
 
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from("favorites")
     .select("id")
     .eq("user_id", user.id)
@@ -114,7 +114,7 @@ export async function getFavorites() {
     return { error: "로그인이 필요합니다.", data: [] };
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("favorites")
     .select(
       `
