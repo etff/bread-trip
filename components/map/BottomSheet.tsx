@@ -150,6 +150,13 @@ export default function BottomSheet({
             </div>
           )}
 
+          {/* Description */}
+          {bakery.description && (
+            <div className="mb-4">
+              <p className="text-gray-700 leading-relaxed">{bakery.description}</p>
+            </div>
+          )}
+
           {/* Info */}
           <div className="space-y-3 mb-6">
             {bakery.signature_bread && (

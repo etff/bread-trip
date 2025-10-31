@@ -45,6 +45,7 @@ export interface Database {
           lat: number;
           lng: number;
           signature_bread: string | null;
+          description: string | null;
           image_url: string | null;
           created_by: string | null;
           created_at: string;
@@ -57,6 +58,7 @@ export interface Database {
           lat: number;
           lng: number;
           signature_bread?: string | null;
+          description?: string | null;
           image_url?: string | null;
           created_by?: string | null;
           created_at?: string;
@@ -69,6 +71,7 @@ export interface Database {
           lat?: number;
           lng?: number;
           signature_bread?: string | null;
+          description?: string | null;
           image_url?: string | null;
           created_by?: string | null;
           created_at?: string;

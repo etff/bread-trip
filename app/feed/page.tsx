@@ -36,7 +36,7 @@ export default function FeedPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-brown">피드</h1>
           <p className="text-gray-700 text-sm mt-1 font-medium">
-            다른 빵지러들의 탐험을 둘러보세요
+            다른 빵집의 리뷰를 확인해보세요!
           </p>
         </div>
 

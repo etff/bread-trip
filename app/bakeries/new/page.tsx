@@ -40,6 +40,7 @@ export default function NewBakeryPage() {
     lat: 0,
     lng: 0,
     signature_bread: "",
+    description: "",
     image_url: "",
   });
 
@@ -241,6 +242,22 @@ export default function NewBakeryPage() {
                 setFormData({ ...formData, signature_bread: e.target.value })
               }
             />
+
+            {/* 빵집 소개 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                빵집 소개
+              </label>
+              <textarea
+                placeholder="이 빵집의 특징이나 분위기를 소개해주세요"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={4}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent text-gray-900 resize-none"
+              />
+            </div>
 
             {/* 이미지 업로드 */}
             <div>

@@ -135,6 +135,13 @@ export default function BakeryDetailPage() {
             )}
           </div>
 
+          {/* 소개 */}
+          {bakery.description && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <p className="text-gray-700 leading-relaxed">{bakery.description}</p>
+            </div>
+          )}
+
           {/* 상세 정보 카드 */}
           <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
             {bakery.signature_bread && (
