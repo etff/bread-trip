@@ -147,13 +147,14 @@ export default function KakaoMap({
       markersRef.current.push(marker);
     });
 
-    // 모든 마커가 보이도록 bounds 조정
-    if (bakeries.length > 0) {
+    // 초기 로드 시에만 모든 마커가 보이도록 bounds 조정
+    if (bakeries.length > 0 && !isInitialBoundsSetRef.current) {
       const bounds = new window.kakao.maps.LatLngBounds();
       bakeries.forEach((bakery) => {
         bounds.extend(new window.kakao.maps.LatLng(bakery.lat, bakery.lng));
       });
       map.setBounds(bounds);
+      isInitialBoundsSetRef.current = true;
     }
   }, [map, bakeries, onMarkerClick]);
 
