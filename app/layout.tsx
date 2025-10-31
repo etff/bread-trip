@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navigation from "@/components/layout/Navigation";
 import KakaoMapsLoader from "@/components/KakaoMapsLoader";
@@ -34,6 +35,20 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geist.variable} antialiased`}>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-C6YS6FL7RX"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-C6YS6FL7RX');
+          `}
+        </Script>
+
         <KakaoMapsLoader />
         <div className="flex flex-col min-h-screen">
           <main className="flex-1 pb-16">
