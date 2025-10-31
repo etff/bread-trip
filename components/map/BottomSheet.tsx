@@ -42,8 +42,8 @@ export default function BottomSheet({
       {/* Bottom Sheet */}
       <div
         className={cn(
-          "fixed bottom-0 left-1/2 -translate-x-1/2 z-50",
-          "w-full max-w-lg mx-4",
+          "fixed bottom-0 left-0 right-0 z-50",
+          "w-full max-w-lg mx-auto",
           "bg-white rounded-t-3xl shadow-2xl",
           "max-h-[80vh] overflow-y-auto",
           "animate-in slide-in-from-bottom-full duration-300"
