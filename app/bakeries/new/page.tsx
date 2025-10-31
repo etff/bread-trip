@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Search, MapPin } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -33,6 +33,7 @@ const districts: District[] = [
 export default function NewBakeryPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isKakaoLoaded, setIsKakaoLoaded] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -49,8 +50,49 @@ export default function NewBakeryPage() {
   const [searchResults, setSearchResults] = useState<AddressSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Kakao Maps SDK 로드 대기
+  useEffect(() => {
+    const checkKakaoLoaded = () => {
+      if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+        setIsKakaoLoaded(true);
+        return true;
+      }
+      return false;
+    };
+
+    if (checkKakaoLoaded()) {
+      return;
+    }
+
+    // SDK가 로드될 때까지 polling
+    const interval = setInterval(() => {
+      if (checkKakaoLoaded()) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    // 최대 10초 대기
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      if (!isKakaoLoaded) {
+        console.error("Kakao Maps SDK 로드 실패");
+      }
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   const handleAddressSearch = () => {
     if (!addressQuery.trim()) return;
+
+    // Kakao Maps SDK 로드 확인
+    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+      alert("지도 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
 
     setIsSearching(true);
 
@@ -176,7 +218,7 @@ export default function NewBakeryPage() {
                 <Button
                   type="button"
                   onClick={handleAddressSearch}
-                  disabled={isSearching}
+                  disabled={isSearching || !isKakaoLoaded}
                   className="px-4"
                 >
                   <Search className="w-5 h-5" />
