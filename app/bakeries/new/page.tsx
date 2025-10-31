@@ -233,7 +233,7 @@ export default function NewBakeryPage() {
                       key={index}
                       type="button"
                       onClick={() => handleSelectAddress(result)}
-                      className="w-full text-left px-3 py-2 hover:bg-cream rounded-lg transition-colors text-sm"
+                      className="w-full text-left px-3 py-2 hover:bg-cream rounded-lg transition-colors text-sm text-gray-900 font-medium"
                     >
                       <MapPin className="w-4 h-4 inline mr-1 text-brown" />
                       {result.address_name}
@@ -244,7 +244,7 @@ export default function NewBakeryPage() {
 
               {/* 선택된 주소 */}
               {formData.address && (
-                <div className="mt-2 p-3 bg-cream rounded-lg text-sm">
+                <div className="mt-2 p-3 bg-cream rounded-lg text-sm text-gray-900 font-semibold">
                   <MapPin className="w-4 h-4 inline mr-1 text-brown" />
                   {formData.address}
                 </div>
