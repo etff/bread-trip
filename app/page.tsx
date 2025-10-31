@@ -83,7 +83,8 @@ export default function Home() {
       {/* FAB - 빵집 등록 버튼 */}
       <button
         onClick={() => router.push("/bakeries/new")}
-        className="fixed right-4 bottom-20 z-20 w-14 h-14 bg-brown text-white rounded-full shadow-lg hover:bg-brown/90 transition-all hover:scale-110 flex items-center justify-center"
+        className="fixed right-4 bottom-24 z-[60] w-14 h-14 bg-brown text-white rounded-full shadow-lg hover:bg-brown/90 transition-all hover:scale-110 flex items-center justify-center active:scale-95"
+        aria-label="빵집 등록"
       >
         <Plus className="w-6 h-6" />
       </button>
