@@ -19,6 +19,7 @@ export default function KakaoMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
   const markersRef = useRef<any[]>([]);
+  const isInitialBoundsSetRef = useRef(false);
 
   // 지도 초기화
   useEffect(() => {
