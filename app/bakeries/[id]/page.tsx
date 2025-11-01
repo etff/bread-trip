@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Croissant, Heart } from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import StarRating from "@/components/ui/StarRating";
 import ReviewModal from "@/components/review/ReviewModal";
 import ReviewCard from "@/components/review/ReviewCard";
 import { getUser } from "@/app/actions/auth";
@@ -140,7 +141,15 @@ export default function BakeryDetailPage() {
               {bakery.name}
             </h2>
             {bakery.district && (
-              <p className="text-gray-700 font-semibold">📍 {bakery.district}</p>
+              <p className="text-gray-700 font-semibold mb-2">📍 {bakery.district}</p>
+            )}
+            {/* 평점 */}
+            {bakery.average_rating !== undefined && bakery.average_rating > 0 && (
+              <StarRating
+                rating={bakery.average_rating}
+                reviewCount={bakery.review_count}
+                size="md"
+              />
             )}
           </div>
 

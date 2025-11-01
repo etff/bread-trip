@@ -8,14 +8,14 @@ import BottomSheet from "@/components/map/BottomSheet";
 import ThemeFilter from "@/components/map/ThemeFilter";
 import AuthModal from "@/components/layout/AuthModal";
 import { getUser } from "@/app/actions/auth";
-import type { Bakery, Theme } from "@/types/common";
+import type { Bakery, BakeryWithRating, Theme } from "@/types/common";
 
 export default function Home() {
   const router = useRouter();
-  const [bakeries, setBakeries] = useState<Bakery[]>([]);
+  const [bakeries, setBakeries] = useState<BakeryWithRating[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
-  const [selectedBakery, setSelectedBakery] = useState<Bakery | null>(null);
+  const [selectedBakery, setSelectedBakery] = useState<BakeryWithRating | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 

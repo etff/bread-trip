@@ -30,7 +30,8 @@ export async function GET(request: Request) {
             description,
             image_url,
             created_by,
-            created_at
+            created_at,
+            reviews(rating)
           )
         `
         )
@@ -44,6 +45,22 @@ export async function GET(request: Request) {
         ?.map((bt: any) => bt.bakery)
         .filter((b: any) => b !== null) || [];
 
+      // 평균 평점 계산
+      bakeries = bakeries.map((bakery: any) => {
+        const reviews = bakery.reviews || [];
+        const reviewCount = reviews.length;
+        const averageRating = reviewCount > 0
+          ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewCount
+          : 0;
+
+        const { reviews: _, ...bakeryData } = bakery;
+        return {
+          ...bakeryData,
+          review_count: reviewCount,
+          average_rating: Math.round(averageRating * 10) / 10,
+        };
+      });
+
       // 지역 필터 적용
       if (district && bakeries.length > 0) {
         bakeries = bakeries.filter((b: any) => b.district === district);
@@ -52,10 +69,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ bakeries });
     }
 
-    // 일반 빵집 목록 조회
+    // 일반 빵집 목록 조회 (리뷰 정보 포함)
     let query = supabase
       .from("bakeries")
-      .select("*")
+      .select(`
+        *,
+        reviews(rating)
+      `)
       .order("created_at", { ascending: false });
 
     // 지역 필터
@@ -69,10 +89,26 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // 평균 평점 계산
+    const bakeriesWithRating = data?.map((bakery: any) => {
+      const reviews = bakery.reviews || [];
+      const reviewCount = reviews.length;
+      const averageRating = reviewCount > 0
+        ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewCount
+        : 0;
+
+      const { reviews: _, ...bakeryData } = bakery;
+      return {
+        ...bakeryData,
+        review_count: reviewCount,
+        average_rating: Math.round(averageRating * 10) / 10, // 소수점 1자리
+      };
+    });
+
     // TODO: 좌표 기반 반경 검색은 PostGIS 필요 (추후 구현)
     // 현재는 전체 빵집 반환
 
-    return NextResponse.json({ bakeries: data || [] });
+    return NextResponse.json({ bakeries: bakeriesWithRating || [] });
   } catch (error) {
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },

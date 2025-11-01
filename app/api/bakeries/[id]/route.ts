@@ -9,16 +9,28 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
-    // 빵집 정보 조회
+    // 빵집 정보 조회 (리뷰 정보 포함)
     const { data, error } = await supabase
       .from("bakeries")
-      .select("*")
+      .select(`
+        *,
+        reviews(rating)
+      `)
       .eq("id", id)
       .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 404 });
     }
+
+    // 평균 평점 계산
+    const reviews = (data as any).reviews || [];
+    const reviewCount = reviews.length;
+    const averageRating = reviewCount > 0
+      ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewCount
+      : 0;
+
+    const { reviews: _, ...bakeryData } = data as any;
 
     // 빵집에 연결된 테마 조회
     const { data: bakeryThemes } = await (supabase as any)
@@ -42,7 +54,9 @@ export async function GET(
 
     return NextResponse.json({
       bakery: {
-        ...data,
+        ...bakeryData,
+        review_count: reviewCount,
+        average_rating: Math.round(averageRating * 10) / 10,
         themes
       }
     });

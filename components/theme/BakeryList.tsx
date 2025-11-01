@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { MapPin, Croissant } from "lucide-react";
-import type { Bakery } from "@/types/common";
+import StarRating from "@/components/ui/StarRating";
+import type { BakeryWithRating } from "@/types/common";
 
 interface BakeryListProps {
-  bakeries: Bakery[];
+  bakeries: BakeryWithRating[];
 }
 
 export default function BakeryList({ bakeries }: BakeryListProps) {
@@ -51,8 +52,20 @@ export default function BakeryList({ bakeries }: BakeryListProps) {
                 {bakery.name}
               </h3>
 
+              {/* 평점 */}
+              {bakery.average_rating !== undefined && bakery.average_rating > 0 && (
+                <div className="mb-2">
+                  <StarRating
+                    rating={bakery.average_rating}
+                    reviewCount={bakery.review_count}
+                    size="sm"
+                    showCount={false}
+                  />
+                </div>
+              )}
+
               {/* 지역 */}
-              <div className="flex items-center text-gray-600 text-sm mb-2">
+              <div className="flex items-center text-gray-600 text-sm mb-1">
                 <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
                 <span className="truncate">
                   {bakery.district || "서울"}

@@ -26,6 +26,11 @@ export type BakeryWithReviews = Bakery & {
   average_rating?: number;
 };
 
+export type BakeryWithRating = Bakery & {
+  review_count?: number;
+  average_rating?: number;
+};
+
 export type ReviewWithUser = Review & {
   user: Pick<User, "id" | "nickname" | "profile_image_url">;
 };

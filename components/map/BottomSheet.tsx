@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { X, MapPin, Croissant, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Bakery } from "@/types/common";
+import type { BakeryWithRating } from "@/types/common";
 import Button from "@/components/ui/Button";
+import StarRating from "@/components/ui/StarRating";
 import { addFavorite, removeFavorite, isFavorite } from "@/app/actions/favorites";
 import { getUser } from "@/app/actions/auth";
 
 interface BottomSheetProps {
-  bakery: Bakery | null;
+  bakery: BakeryWithRating | null;
   onClose: () => void;
-  onViewDetail: (bakery: Bakery) => void;
+  onViewDetail: (bakery: BakeryWithRating) => void;
 }
 
 export default function BottomSheet({
@@ -110,10 +111,18 @@ export default function BottomSheet({
               <h2 className="text-2xl font-bold text-brown mb-1">
                 {bakery.name}
               </h2>
-              <div className="flex items-center text-gray-700 text-sm font-medium">
+              <div className="flex items-center text-gray-700 text-sm font-medium mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
                 {bakery.district || "서울"}
               </div>
+              {/* 평점 */}
+              {bakery.average_rating !== undefined && bakery.average_rating > 0 && (
+                <StarRating
+                  rating={bakery.average_rating}
+                  reviewCount={bakery.review_count}
+                  size="sm"
+                />
+              )}
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -160,8 +169,11 @@ export default function BottomSheet({
 
           {/* Description */}
           {bakery.description && (
-            <div className="mb-4">
-              <p className="text-gray-700 leading-relaxed">{bakery.description}</p>
+            <div className="bg-warm/50 rounded-xl p-4 mb-4">
+              <h3 className="text-sm font-bold text-brown mb-2">소개</h3>
+              <p className="text-gray-700 leading-relaxed text-sm">
+                {bakery.description}
+              </p>
             </div>
           )}
 
