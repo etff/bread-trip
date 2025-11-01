@@ -1,78 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
-import KakaoMap from "@/components/map/KakaoMap";
-import BottomSheet from "@/components/map/BottomSheet";
-import ThemeFilter from "@/components/map/ThemeFilter";
-import AuthModal from "@/components/layout/AuthModal";
-import { getUser } from "@/app/actions/auth";
-import type { Bakery, BakeryWithRating, Theme } from "@/types/common";
+import { Map, List } from "lucide-react";
+import MapView from "@/components/explore/MapView";
+import FeedView from "@/components/explore/FeedView";
+import type { BakeryWithRating, Theme } from "@/types/common";
+
+type TabType = "map" | "feed";
 
 export default function Home() {
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TabType>("feed");
   const [bakeries, setBakeries] = useState<BakeryWithRating[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
-  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
-  const [selectedBakery, setSelectedBakery] = useState<BakeryWithRating | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchThemes();
-    fetchBakeries();
+    fetchInitialData();
   }, []);
 
-  useEffect(() => {
-    fetchBakeries();
-  }, [selectedThemeId]);
-
-  const fetchThemes = async () => {
+  const fetchInitialData = async () => {
     try {
-      const response = await fetch("/api/themes");
-      const data = await response.json();
+      // 빵집 데이터 로드
+      const bakeriesResponse = await fetch("/api/bakeries");
+      const bakeriesData = await bakeriesResponse.json();
 
-      if (data.themes) {
-        setThemes(data.themes);
+      if (bakeriesData.bakeries) {
+        setBakeries(bakeriesData.bakeries);
+      }
+
+      // 테마 데이터 로드
+      const themesResponse = await fetch("/api/themes");
+      const themesData = await themesResponse.json();
+
+      if (themesData.themes) {
+        setThemes(themesData.themes);
       }
     } catch (error) {
-      console.error("테마 데이터 로드 실패:", error);
-    }
-  };
-
-  const fetchBakeries = async () => {
-    try {
-      const url = selectedThemeId
-        ? `/api/bakeries?theme=${selectedThemeId}`
-        : "/api/bakeries";
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data.bakeries) {
-        setBakeries(data.bakeries);
-      }
-    } catch (error) {
-      console.error("빵집 데이터 로드 실패:", error);
+      console.error("데이터 로드 실패:", error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleMarkerClick = (bakery: Bakery) => {
-    setSelectedBakery(bakery);
-  };
-
-  const handleViewDetail = (bakery: Bakery) => {
-    router.push(`/bakeries/${bakery.id}`);
-  };
-
-  const handleAddBakeryClick = async () => {
-    const user = await getUser();
-    if (user) {
-      router.push("/bakeries/new");
-    } else {
-      setIsAuthModalOpen(true);
     }
   };
 
@@ -88,61 +54,47 @@ export default function Home() {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full">
-      {/* 지도 */}
-      <div className="absolute inset-0">
-        <KakaoMap
-          bakeries={bakeries}
-          onMarkerClick={handleMarkerClick}
-          center={{ lat: 37.5665, lng: 126.9780 }}
-          level={7}
-        />
+    <div className="h-screen w-full flex flex-col">
+      {/* 탭 네비게이션 */}
+      <div className="bg-white border-b border-cream sticky top-0 z-50">
+        <div className="max-w-screen-lg mx-auto">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab("feed")}
+              className={`flex-1 flex items-center justify-center gap-2 py-4 font-semibold transition-colors ${
+                activeTab === "feed"
+                  ? "text-brown border-b-2 border-brown"
+                  : "text-gray-500 hover:text-brown"
+              }`}
+            >
+              <List className="w-5 h-5" />
+              <span>피드</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("map")}
+              className={`flex-1 flex items-center justify-center gap-2 py-4 font-semibold transition-colors ${
+                activeTab === "map"
+                  ? "text-brown border-b-2 border-brown"
+                  : "text-gray-500 hover:text-brown"
+              }`}
+            >
+              <Map className="w-5 h-5" />
+              <span>지도</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* 상단 배너 */}
-      <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg mb-3">
-          <h1 className="text-xl font-bold text-brown mb-1">빵지순례 🍞</h1>
-          <p className="text-sm text-gray-600">
-            {selectedThemeId
-              ? `${bakeries.length}개의 테마별 빵집`
-              : `서울에 있는 ${bakeries.length}개의 빵집을 탐험해보세요`}
-          </p>
-        </div>
-
-        {/* 테마 필터 */}
-        {themes.length > 0 && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl py-3 shadow-lg">
-            <ThemeFilter
-              themes={themes}
-              selectedThemeId={selectedThemeId}
-              onSelectTheme={setSelectedThemeId}
-            />
+      {/* 탭 컨텐츠 */}
+      <div className="flex-1 overflow-hidden">
+        {activeTab === "map" ? (
+          <MapView initialBakeries={bakeries} initialThemes={themes} />
+        ) : (
+          <div className="h-full overflow-y-auto">
+            <FeedView initialThemes={themes} />
           </div>
         )}
       </div>
-
-      {/* 하단 시트 */}
-      <BottomSheet
-        bakery={selectedBakery}
-        onClose={() => setSelectedBakery(null)}
-        onViewDetail={handleViewDetail}
-      />
-
-      {/* FAB - 빵집 등록 버튼 */}
-      <button
-        onClick={handleAddBakeryClick}
-        className="fixed right-4 bottom-24 z-[60] w-14 h-14 bg-brown text-white rounded-full shadow-lg hover:bg-brown/90 transition-all hover:scale-110 flex items-center justify-center active:scale-95 cursor-pointer"
-        aria-label="빵집 등록"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
-
-      {/* 로그인 모달 */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
     </div>
   );
 }

@@ -9,6 +9,8 @@ export async function GET(request: Request) {
   const radius = searchParams.get("radius") || "5000"; // 기본 5km
   const district = searchParams.get("district");
   const themeId = searchParams.get("theme");
+  const sort = searchParams.get("sort"); // "rating" or "recent"
+  const limit = searchParams.get("limit"); // 개수 제한
 
   try {
     const supabase = await createClient();
@@ -90,7 +92,7 @@ export async function GET(request: Request) {
     }
 
     // 평균 평점 계산
-    const bakeriesWithRating = data?.map((bakery: any) => {
+    let bakeriesWithRating = data?.map((bakery: any) => {
       const reviews = bakery.reviews || [];
       const reviewCount = reviews.length;
       const averageRating = reviewCount > 0
@@ -103,12 +105,28 @@ export async function GET(request: Request) {
         review_count: reviewCount,
         average_rating: Math.round(averageRating * 10) / 10, // 소수점 1자리
       };
-    });
+    }) || [];
+
+    // 정렬
+    if (sort === "rating") {
+      bakeriesWithRating = bakeriesWithRating.sort((a, b) => {
+        // 평점 높은 순, 평점 같으면 리뷰 수 많은 순
+        if (b.average_rating !== a.average_rating) {
+          return b.average_rating - a.average_rating;
+        }
+        return b.review_count - a.review_count;
+      });
+    }
+
+    // 개수 제한
+    if (limit) {
+      bakeriesWithRating = bakeriesWithRating.slice(0, parseInt(limit));
+    }
 
     // TODO: 좌표 기반 반경 검색은 PostGIS 필요 (추후 구현)
     // 현재는 전체 빵집 반환
 
-    return NextResponse.json({ bakeries: bakeriesWithRating || [] });
+    return NextResponse.json({ bakeries: bakeriesWithRating });
   } catch (error) {
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },
