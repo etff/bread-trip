@@ -2,16 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Search, MapPin } from "lucide-react";
+import { ArrowLeft, AlertCircle, CheckCircle, History, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ImageUpload from "@/components/ui/ImageUpload";
+import BakeryRegistrationMap from "@/components/map/BakeryRegistrationMap";
+import { detectDistrictFromAddress } from "@/lib/utils";
 import type { District } from "@/types/common";
 
-interface AddressSearchResult {
-  address_name: string;
-  x: string; // lng
-  y: string; // lat
+interface Location {
+  lat: number;
+  lng: number;
+  address?: string;
+}
+
+interface DuplicateBakery {
+  id: string;
+  name: string;
+  address: string;
+  distance?: number;
+  matchReason: "same_name" | "nearby";
 }
 
 const districts: District[] = [
@@ -30,10 +40,12 @@ const districts: District[] = [
   "기타",
 ];
 
+const RECENT_LOCATIONS_KEY = "breadtrip_recent_locations";
+const MAX_RECENT_LOCATIONS = 5;
+
 export default function NewBakeryPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isKakaoLoaded, setIsKakaoLoaded] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -45,82 +57,111 @@ export default function NewBakeryPage() {
     image_url: "",
   });
 
-  // 주소 검색
-  const [addressQuery, setAddressQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<AddressSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  // 중복 체크
+  const [duplicates, setDuplicates] = useState<DuplicateBakery[]>([]);
+  const [isDuplicateChecking, setIsDuplicateChecking] = useState(false);
 
-  // Kakao Maps SDK 로드 대기
+  // 최근 위치
+  const [recentLocations, setRecentLocations] = useState<Location[]>([]);
+  const [showRecentLocations, setShowRecentLocations] = useState(false);
+
+  // 최근 위치 불러오기
   useEffect(() => {
-    const checkKakaoLoaded = () => {
-      if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-        setIsKakaoLoaded(true);
-        return true;
+    try {
+      const saved = localStorage.getItem(RECENT_LOCATIONS_KEY);
+      if (saved) {
+        const locations = JSON.parse(saved);
+        setRecentLocations(locations);
       }
-      return false;
-    };
-
-    if (checkKakaoLoaded()) {
-      return;
+    } catch (error) {
+      console.error("Failed to load recent locations:", error);
     }
-
-    // SDK가 로드될 때까지 polling
-    const interval = setInterval(() => {
-      if (checkKakaoLoaded()) {
-        clearInterval(interval);
-      }
-    }, 100);
-
-    // 최대 10초 대기
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      if (!isKakaoLoaded) {
-        console.error("Kakao Maps SDK 로드 실패");
-      }
-    }, 10000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
   }, []);
 
-  const handleAddressSearch = () => {
-    if (!addressQuery.trim()) return;
+  // 최근 위치 저장
+  const saveRecentLocation = (location: Location) => {
+    try {
+      const updated = [
+        location,
+        ...recentLocations.filter(
+          (loc) => loc.address !== location.address
+        ),
+      ].slice(0, MAX_RECENT_LOCATIONS);
 
-    // Kakao Maps SDK 로드 확인
-    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
-      alert("지도 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      localStorage.setItem(RECENT_LOCATIONS_KEY, JSON.stringify(updated));
+      setRecentLocations(updated);
+    } catch (error) {
+      console.error("Failed to save recent location:", error);
+    }
+  };
+
+  // 위치 선택 핸들러
+  const handleLocationSelect = (location: Location) => {
+    setFormData({
+      ...formData,
+      address: location.address || "",
+      lat: location.lat,
+      lng: location.lng,
+      district: detectDistrictFromAddress(location.address || ""),
+    });
+
+    // 최근 위치 저장
+    if (location.address) {
+      saveRecentLocation(location);
+    }
+
+    // 중복 체크 수행
+    checkDuplicates(formData.name, location.lat, location.lng);
+  };
+
+  // 중복 체크 함수
+  const checkDuplicates = async (
+    name: string,
+    lat: number,
+    lng: number
+  ) => {
+    if (!name.trim() && (!lat || !lng)) {
+      setDuplicates([]);
       return;
     }
 
-    setIsSearching(true);
+    setIsDuplicateChecking(true);
 
-    // Kakao 주소 검색 API
-    const geocoder = new window.kakao.maps.services.Geocoder();
+    try {
+      const params = new URLSearchParams();
+      if (name.trim()) params.append("name", name.trim());
+      if (lat) params.append("lat", lat.toString());
+      if (lng) params.append("lng", lng.toString());
 
-    geocoder.addressSearch(addressQuery, (result: any, status: any) => {
-      setIsSearching(false);
+      const response = await fetch(
+        `/api/bakeries/check-duplicate?${params.toString()}`
+      );
+      const data = await response.json();
 
-      if (status === window.kakao.maps.services.Status.OK) {
-        setSearchResults(result);
+      if (response.ok && data.hasDuplicates) {
+        setDuplicates(data.duplicates);
       } else {
-        alert("주소를 찾을 수 없습니다. 다시 시도해주세요.");
-        setSearchResults([]);
+        setDuplicates([]);
       }
-    });
+    } catch (error) {
+      console.error("Duplicate check failed:", error);
+    } finally {
+      setIsDuplicateChecking(false);
+    }
   };
 
-  const handleSelectAddress = (result: AddressSearchResult) => {
-    setFormData({
-      ...formData,
-      address: result.address_name,
-      lat: parseFloat(result.y),
-      lng: parseFloat(result.x),
-    });
-    setSearchResults([]);
-    setAddressQuery("");
-  };
+  // 빵집 이름 변경 시 중복 체크
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.name.trim()) {
+        checkDuplicates(formData.name, formData.lat, formData.lng);
+      } else {
+        setDuplicates([]);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [formData.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,9 +172,17 @@ export default function NewBakeryPage() {
       return;
     }
 
-    if (!formData.address) {
-      alert("주소를 검색하여 선택해주세요.");
+    if (!formData.address || formData.lat === 0 || formData.lng === 0) {
+      alert("지도에서 위치를 선택해주세요.");
       return;
+    }
+
+    // 중복 경고
+    if (duplicates.length > 0) {
+      const confirmed = confirm(
+        `유사한 빵집 ${duplicates.length}곳이 발견되었습니다. 그래도 등록하시겠습니까?`
+      );
+      if (!confirmed) return;
     }
 
     setIsLoading(true);
@@ -186,75 +235,146 @@ export default function NewBakeryPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 빵집 이름 */}
-            <Input
-              label="빵집 이름 *"
-              placeholder="예) 성수연방"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-
-            {/* 주소 검색 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
-                주소 검색 *
-              </label>
+              <Input
+                label="빵집 이름 *"
+                placeholder="예) 성수연방"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                required
+              />
 
-              <div className="flex gap-2 mb-2">
-                <Input
-                  placeholder="주소를 입력하세요"
-                  value={addressQuery}
-                  onChange={(e) => setAddressQuery(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddressSearch();
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  onClick={handleAddressSearch}
-                  disabled={isSearching || !isKakaoLoaded}
-                  className="px-4"
-                >
-                  <Search className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* 검색 결과 */}
-              {searchResults.length > 0 && (
-                <div className="border border-cream rounded-lg p-2 space-y-1 max-h-48 overflow-y-auto">
-                  {searchResults.map((result, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleSelectAddress(result)}
-                      className="w-full text-left px-3 py-2 hover:bg-cream rounded-lg transition-colors text-sm text-gray-900 font-medium"
-                    >
-                      <MapPin className="w-4 h-4 inline mr-1 text-brown" />
-                      {result.address_name}
-                    </button>
-                  ))}
+              {/* 중복 체크 결과 */}
+              {isDuplicateChecking && (
+                <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
+                  <div className="animate-spin">🔍</div>
+                  중복 체크 중...
                 </div>
               )}
 
-              {/* 선택된 주소 */}
-              {formData.address && (
-                <div className="mt-2 p-3 bg-cream rounded-lg text-sm text-gray-900 font-semibold">
-                  <MapPin className="w-4 h-4 inline mr-1 text-brown" />
-                  {formData.address}
+              {duplicates.length > 0 && (
+                <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-start gap-2 mb-2">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-amber-900">
+                        비슷한 빵집이 이미 등록되어 있습니다
+                      </p>
+                      <div className="mt-2 space-y-1">
+                        {duplicates.map((dup) => (
+                          <div
+                            key={dup.id}
+                            className="text-xs text-amber-800 bg-white/50 rounded px-2 py-1"
+                          >
+                            <span className="font-semibold">{dup.name}</span>
+                            <span className="text-amber-600 ml-2">
+                              {dup.matchReason === "same_name"
+                                ? "(같은 이름)"
+                                : `(${dup.distance}m 거리)`}
+                            </span>
+                            <br />
+                            <span className="text-amber-700">{dup.address}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {duplicates.length === 0 && formData.name.trim() && !isDuplicateChecking && (
+                <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
+                  <CheckCircle className="w-4 h-4" />
+                  등록 가능합니다
                 </div>
               )}
             </div>
 
-            {/* 지역 선택 */}
+            {/* 지도에서 위치 선택 */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-gray-800">
+                  위치 선택 *
+                </label>
+
+                {/* 최근 위치 버튼 */}
+                {recentLocations.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowRecentLocations(!showRecentLocations)}
+                    className="text-sm text-brown hover:text-brown/80 flex items-center gap-1"
+                  >
+                    <History className="w-4 h-4" />
+                    최근 위치
+                  </button>
+                )}
+              </div>
+
+              {/* 최근 위치 목록 */}
+              {showRecentLocations && recentLocations.length > 0 && (
+                <div className="mb-3 p-3 bg-cream rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-gray-800">
+                      최근 검색한 위치
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowRecentLocations(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    {recentLocations.map((loc, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          handleLocationSelect(loc);
+                          setShowRecentLocations(false);
+                        }}
+                        className="w-full text-left px-3 py-2 bg-white hover:bg-gray-50 rounded-lg transition-colors text-sm"
+                      >
+                        {loc.address}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="h-[500px] rounded-lg overflow-hidden border border-cream">
+                <BakeryRegistrationMap
+                  onLocationSelect={handleLocationSelect}
+                  initialLocation={
+                    formData.lat && formData.lng
+                      ? {
+                          lat: formData.lat,
+                          lng: formData.lng,
+                          address: formData.address,
+                        }
+                      : undefined
+                  }
+                />
+              </div>
+
+              {/* 선택된 주소 표시 */}
+              {formData.address && (
+                <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    <span className="font-semibold">선택된 주소:</span>{" "}
+                    {formData.address}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 자동 감지된 지역 (수정 가능) */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">
-                지역
+                지역 {formData.district && <span className="text-xs text-green-600">(자동 감지됨)</span>}
               </label>
               <select
                 value={formData.district}
@@ -318,7 +438,13 @@ export default function NewBakeryPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || !formData.name || !formData.address}
+              disabled={
+                isLoading ||
+                !formData.name ||
+                !formData.address ||
+                formData.lat === 0 ||
+                formData.lng === 0
+              }
             >
               {isLoading ? "등록 중..." : "빵집 등록하기"}
             </Button>
