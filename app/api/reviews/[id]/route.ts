@@ -36,7 +36,7 @@ export async function PATCH(
       );
     }
 
-    if (existingReview.user_id !== user.id) {
+    if ((existingReview as { user_id: string }).user_id !== user.id) {
       return NextResponse.json(
         { error: "본인이 작성한 리뷰만 수정할 수 있습니다." },
         { status: 403 }
@@ -47,12 +47,16 @@ export async function PATCH(
     const body = await request.json();
     const { rating, comment, photo_url } = body;
 
-    const updateData: any = {};
+    const updateData: Partial<{
+      rating: number;
+      comment: string;
+      photo_url: string;
+    }> = {};
     if (rating !== undefined) updateData.rating = rating;
     if (comment !== undefined) updateData.comment = comment;
     if (photo_url !== undefined) updateData.photo_url = photo_url;
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("reviews")
       .update(updateData)
       .eq("id", id)
@@ -111,7 +115,7 @@ export async function DELETE(
       );
     }
 
-    if (existingReview.user_id !== user.id) {
+    if ((existingReview as { user_id: string }).user_id !== user.id) {
       return NextResponse.json(
         { error: "본인이 작성한 리뷰만 삭제할 수 있습니다." },
         { status: 403 }

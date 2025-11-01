@@ -41,6 +41,8 @@ export type ReviewWithBakery = Review & {
 
 export type BakeryWithThemes = Bakery & {
   themes: Theme[];
+  review_count?: number;
+  average_rating?: number;
 };
 
 export type ThemeWithBakeries = Theme & {

@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = params;
+    const { id } = await params;
 
     // 테마 정보 조회
     const { data: theme, error: themeError } = await supabase
@@ -59,7 +59,7 @@ export async function GET(
 
     return NextResponse.json({
       theme: {
-        ...theme,
+        ...(theme as any),
         bakeries,
         bakery_count: bakeries.length,
       },

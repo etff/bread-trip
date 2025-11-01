@@ -18,7 +18,7 @@ export async function checkAndAwardBadges(userId: string) {
       .select("badge_id")
       .eq("user_id", userId);
 
-    const earnedBadgeIds = new Set(userBadges?.map((ub) => ub.badge_id) || []);
+    const earnedBadgeIds = new Set(userBadges?.map((ub: any) => ub.badge_id) || []);
 
     // 사용자 통계 조회
     const { data: reviews } = await (supabase as any)
@@ -71,33 +71,34 @@ export async function checkAndAwardBadges(userId: string) {
     // 각 배지의 조건 확인
     const badgesToAward: string[] = [];
 
-    for (const badge of badges) {
+    for (const badge of (badges || [])) {
       // 이미 획득한 배지는 건너뛰기
-      if (earnedBadgeIds.has(badge.id)) continue;
+      if (earnedBadgeIds.has((badge as any).id)) continue;
 
       let shouldAward = false;
+      const badgeAny = badge as any;
 
-      switch (badge.condition_type) {
+      switch (badgeAny.condition_type) {
         case "review_count":
-          if (reviewCount >= (badge.condition_value || 0)) {
+          if (reviewCount >= (badgeAny.condition_value || 0)) {
             shouldAward = true;
           }
           break;
 
         case "bakery_count":
-          if (visitedBakeriesCount >= (badge.condition_value || 0)) {
+          if (visitedBakeriesCount >= (badgeAny.condition_value || 0)) {
             shouldAward = true;
           }
           break;
 
         case "perfect_rating":
-          if (perfectRatingCount >= (badge.condition_value || 0)) {
+          if (perfectRatingCount >= (badgeAny.condition_value || 0)) {
             shouldAward = true;
           }
           break;
 
         case "theme_visit_croissant":
-          if ((themeCounts["크루아상"] || 0) >= (badge.condition_value || 0)) {
+          if ((themeCounts["크루아상"] || 0) >= (badgeAny.condition_value || 0)) {
             shouldAward = true;
           }
           break;
@@ -108,13 +109,13 @@ export async function checkAndAwardBadges(userId: string) {
       }
 
       if (shouldAward) {
-        badgesToAward.push(badge.id);
+        badgesToAward.push(badgeAny.id);
       }
     }
 
     // 배지 부여
     if (badgesToAward.length > 0) {
-      const { error } = await supabase.from("user_badges").insert(
+      const { error } = await (supabase as any).from("user_badges").insert(
         badgesToAward.map((badgeId) => ({
           user_id: userId,
           badge_id: badgeId,

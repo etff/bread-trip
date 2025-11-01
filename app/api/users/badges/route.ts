@@ -38,12 +38,12 @@ export async function GET() {
     }
 
     // 배지 정보와 획득 정보 병합
-    const earnedBadgeIds = new Set(userBadges?.map((ub) => ub.badge_id) || []);
+    const earnedBadgeIds = new Set(userBadges?.map((ub: any) => ub.badge_id) || []);
     const earnedBadgesMap = new Map(
-      userBadges?.map((ub) => [ub.badge_id, ub.earned_at]) || []
+      userBadges?.map((ub: any) => [ub.badge_id, ub.earned_at]) || []
     );
 
-    const badges = allBadges?.map((badge) => ({
+    const badges = allBadges?.map((badge: any) => ({
       ...badge,
       earned: earnedBadgeIds.has(badge.id),
       earnedAt: earnedBadgesMap.get(badge.id) || null,
