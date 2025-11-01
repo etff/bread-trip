@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { uploadReviewImage } from "@/lib/supabase/storage";
 import { cn } from "@/lib/utils";
-import type { Bakery } from "@/types/common";
+import type { Bakery, Review } from "@/types/common";
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   bakery: Bakery;
   onSuccess?: () => void;
+  editingReview?: Review; // 수정 모드일 때 기존 리뷰 데이터
 }
 
 export default function ReviewModal({
@@ -21,12 +22,27 @@ export default function ReviewModal({
   onClose,
   bakery,
   onSuccess,
+  editingReview,
 }: ReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 수정 모드일 때 초기값 설정
+  useEffect(() => {
+    if (editingReview) {
+      setRating(editingReview.rating);
+      setComment(editingReview.comment || "");
+      setPhotoUrl(editingReview.photo_url || "");
+    } else {
+      // 새 리뷰 작성 모드일 때 초기화
+      setRating(0);
+      setComment("");
+      setPhotoUrl("");
+    }
+  }, [editingReview, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,30 +55,40 @@ export default function ReviewModal({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/reviews", {
-        method: "POST",
+      const isEditMode = !!editingReview;
+      const url = isEditMode ? `/api/reviews/${editingReview.id}` : "/api/reviews";
+      const method = isEditMode ? "PATCH" : "POST";
+
+      const body: any = {
+        rating,
+        comment,
+        photo_url: photoUrl || undefined,
+      };
+
+      // 새 리뷰 작성일 때만 bakery_id 포함
+      if (!isEditMode) {
+        body.bakery_id = bakery.id;
+      }
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          bakery_id: bakery.id,
-          rating,
-          comment,
-          photo_url: photoUrl || undefined,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert("리뷰가 등록되었습니다!");
+        alert(isEditMode ? "리뷰가 수정되었습니다!" : "리뷰가 등록되었습니다!");
         setRating(0);
         setComment("");
         setPhotoUrl("");
         onSuccess?.();
         onClose();
       } else {
-        alert(data.error || "리뷰 등록에 실패했습니다.");
+        alert(data.error || (isEditMode ? "리뷰 수정에 실패했습니다." : "리뷰 등록에 실패했습니다."));
       }
     } catch (error) {
       alert("오류가 발생했습니다.");
@@ -71,8 +97,14 @@ export default function ReviewModal({
     }
   };
 
+  const isEditMode = !!editingReview;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`${bakery.name} 리뷰 작성`}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${bakery.name} ${isEditMode ? '리뷰 수정' : '리뷰 작성'}`}
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 평점 선택 */}
         <div>
@@ -153,7 +185,9 @@ export default function ReviewModal({
             className="flex-1"
             disabled={isSubmitting || rating === 0}
           >
-            {isSubmitting ? "등록 중..." : "리뷰 등록"}
+            {isSubmitting
+              ? (isEditMode ? "수정 중..." : "등록 중...")
+              : (isEditMode ? "리뷰 수정" : "리뷰 등록")}
           </Button>
         </div>
       </form>

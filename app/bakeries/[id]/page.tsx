@@ -9,7 +9,8 @@ import StarRating from "@/components/ui/StarRating";
 import ReviewModal from "@/components/review/ReviewModal";
 import ReviewCard from "@/components/review/ReviewCard";
 import { getUser } from "@/app/actions/auth";
-import type { BakeryWithThemes, ReviewWithUser } from "@/types/common";
+import { deleteReview } from "@/app/actions/reviews";
+import type { BakeryWithThemes, ReviewWithUser, Review } from "@/types/common";
 
 export default function BakeryDetailPage() {
   const params = useParams();
@@ -20,6 +21,8 @@ export default function BakeryDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [editingReview, setEditingReview] = useState<Review | undefined>(undefined);
 
   useEffect(() => {
     if (params.id) {
@@ -32,6 +35,7 @@ export default function BakeryDetailPage() {
   const checkLoginStatus = async () => {
     const user = await getUser();
     setIsLoggedIn(!!user);
+    setCurrentUserId(user?.id || null);
   };
 
   const fetchBakery = async (id: string) => {
@@ -65,6 +69,32 @@ export default function BakeryDetailPage() {
   const handleToggleFavorite = () => {
     // TODO: 찜하기 API 호출
     setIsFavorite(!isFavorite);
+  };
+
+  const handleEditReview = (review: ReviewWithUser) => {
+    setEditingReview(review as Review);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    const result = await deleteReview(reviewId);
+
+    if (result.error) {
+      alert(result.error);
+    } else {
+      alert("리뷰가 삭제되었습니다.");
+      // 리뷰 목록에서 제거
+      setReviews(reviews.filter((r) => r.id !== reviewId));
+      // 빵집 정보 새로고침 (평점 업데이트)
+      if (bakery) {
+        fetchBakery(bakery.id);
+      }
+    }
+  };
+
+  const handleReviewModalClose = () => {
+    setIsReviewModalOpen(false);
+    setEditingReview(undefined);
   };
 
   if (isLoading) {
@@ -223,6 +253,9 @@ export default function BakeryDetailPage() {
                     key={review.id}
                     review={review}
                     showBakery={false}
+                    currentUserId={currentUserId || undefined}
+                    onEdit={() => handleEditReview(review)}
+                    onDelete={() => handleDeleteReview(review.id)}
                   />
                 ))}
               </div>
@@ -257,14 +290,16 @@ export default function BakeryDetailPage() {
         </div>
       </div>
 
-      {/* 리뷰 작성 모달 */}
+      {/* 리뷰 작성/수정 모달 */}
       {bakery && (
         <ReviewModal
           isOpen={isReviewModalOpen}
-          onClose={() => setIsReviewModalOpen(false)}
+          onClose={handleReviewModalClose}
           bakery={bakery}
+          editingReview={editingReview}
           onSuccess={() => {
             fetchReviews(bakery.id);
+            fetchBakery(bakery.id); // 평점 업데이트
           }}
         />
       )}
