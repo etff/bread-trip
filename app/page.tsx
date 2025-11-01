@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Map, List } from "lucide-react";
+import { Map, Grid } from "lucide-react";
 import MapView from "@/components/explore/MapView";
-import FeedView from "@/components/explore/FeedView";
+import ThemesView from "@/components/explore/ThemesView";
 import type { BakeryWithRating, Theme } from "@/types/common";
 
-type TabType = "map" | "feed";
+type TabType = "map" | "themes";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<TabType>("feed");
+  const [activeTab, setActiveTab] = useState<TabType>("themes");
   const [bakeries, setBakeries] = useState<BakeryWithRating[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,15 +60,15 @@ export default function Home() {
         <div className="max-w-screen-lg mx-auto">
           <div className="flex">
             <button
-              onClick={() => setActiveTab("feed")}
+              onClick={() => setActiveTab("themes")}
               className={`flex-1 flex items-center justify-center gap-2 py-4 font-semibold transition-colors ${
-                activeTab === "feed"
+                activeTab === "themes"
                   ? "text-brown border-b-2 border-brown"
                   : "text-gray-500 hover:text-brown"
               }`}
             >
-              <List className="w-5 h-5" />
-              <span>피드</span>
+              <Grid className="w-5 h-5" />
+              <span>테마</span>
             </button>
             <button
               onClick={() => setActiveTab("map")}
@@ -91,7 +91,7 @@ export default function Home() {
           <MapView initialBakeries={bakeries} initialThemes={themes} />
         ) : (
           <div className="h-full overflow-y-auto">
-            <FeedView initialThemes={themes} />
+            <ThemesView initialThemes={themes} />
           </div>
         )}
       </div>
