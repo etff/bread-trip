@@ -2,7 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, MapPin, Croissant, Heart } from "lucide-react";
+import {
+  ArrowLeft,
+  MapPin,
+  Croissant,
+  Heart,
+  Phone,
+  Clock,
+  Car,
+  Wifi,
+  Dog,
+  Globe,
+  Instagram,
+  DollarSign,
+  Calendar,
+} from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import StarRating from "@/components/ui/StarRating";
@@ -212,6 +226,133 @@ export default function BakeryDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* 실용 정보 카드 */}
+          {(bakery.phone ||
+            bakery.hours ||
+            bakery.closed_days ||
+            bakery.price_range ||
+            bakery.parking_available ||
+            bakery.wifi_available ||
+            bakery.pet_friendly ||
+            bakery.website_url ||
+            bakery.instagram_url) && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-bold text-lg mb-4 text-brown">실용 정보</h3>
+              <div className="space-y-4">
+                {bakery.phone && (
+                  <div className="flex items-start gap-3">
+                    <Phone className="w-5 h-5 text-brown mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">전화번호</p>
+                      <a
+                        href={`tel:${bakery.phone}`}
+                        className="font-semibold text-gray-900 hover:text-brown"
+                      >
+                        {bakery.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {bakery.hours && (
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-brown mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">영업시간</p>
+                      <p className="font-semibold text-gray-900 whitespace-pre-line">
+                        {bakery.hours}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {bakery.closed_days && (
+                  <div className="flex items-start gap-3">
+                    <Calendar className="w-5 h-5 text-brown mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">휴무일</p>
+                      <p className="font-semibold text-gray-900">{bakery.closed_days}</p>
+                    </div>
+                  </div>
+                )}
+
+                {bakery.price_range && (
+                  <div className="flex items-start gap-3">
+                    <DollarSign className="w-5 h-5 text-brown mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">가격대</p>
+                      <p className="font-semibold text-gray-900">{bakery.price_range}</p>
+                    </div>
+                  </div>
+                )}
+
+                {(bakery.parking_available ||
+                  bakery.wifi_available ||
+                  bakery.pet_friendly) && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">편의시설</p>
+                      <div className="flex flex-wrap gap-2">
+                        {bakery.parking_available && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-cream rounded-full text-sm font-semibold text-brown">
+                            <Car className="w-4 h-4" />
+                            주차 가능
+                          </span>
+                        )}
+                        {bakery.wifi_available && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-cream rounded-full text-sm font-semibold text-brown">
+                            <Wifi className="w-4 h-4" />
+                            와이파이
+                          </span>
+                        )}
+                        {bakery.pet_friendly && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-cream rounded-full text-sm font-semibold text-brown">
+                            <Dog className="w-4 h-4" />
+                            반려동물
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {(bakery.website_url || bakery.instagram_url) && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">링크</p>
+                      <div className="flex flex-wrap gap-2">
+                        {bakery.website_url && (
+                          <a
+                            href={bakery.website_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-cream rounded-full text-sm font-semibold text-brown hover:bg-brown hover:text-white transition-colors"
+                          >
+                            <Globe className="w-4 h-4" />
+                            웹사이트
+                          </a>
+                        )}
+                        {bakery.instagram_url && (
+                          <a
+                            href={bakery.instagram_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-cream rounded-full text-sm font-semibold text-brown hover:bg-brown hover:text-white transition-colors"
+                          >
+                            <Instagram className="w-4 h-4" />
+                            인스타그램
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* 테마 섹션 */}
           {bakery.themes && bakery.themes.length > 0 && (

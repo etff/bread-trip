@@ -49,6 +49,15 @@ export interface Database {
           image_url: string | null;
           created_by: string | null;
           created_at: string;
+          phone: string | null;
+          hours: string | null;
+          parking_available: boolean | null;
+          wifi_available: boolean | null;
+          pet_friendly: boolean | null;
+          website_url: string | null;
+          instagram_url: string | null;
+          price_range: string | null;
+          closed_days: string | null;
         };
         Insert: {
           id?: string;
@@ -62,6 +71,15 @@ export interface Database {
           image_url?: string | null;
           created_by?: string | null;
           created_at?: string;
+          phone?: string | null;
+          hours?: string | null;
+          parking_available?: boolean | null;
+          wifi_available?: boolean | null;
+          pet_friendly?: boolean | null;
+          website_url?: string | null;
+          instagram_url?: string | null;
+          price_range?: string | null;
+          closed_days?: string | null;
         };
         Update: {
           id?: string;
@@ -75,6 +93,15 @@ export interface Database {
           image_url?: string | null;
           created_by?: string | null;
           created_at?: string;
+          phone?: string | null;
+          hours?: string | null;
+          parking_available?: boolean | null;
+          wifi_available?: boolean | null;
+          pet_friendly?: boolean | null;
+          website_url?: string | null;
+          instagram_url?: string | null;
+          price_range?: string | null;
+          closed_days?: string | null;
         };
       };
       reviews: {
@@ -173,6 +200,58 @@ export interface Database {
           bakery_id?: string;
           theme_id?: string;
           created_at?: string;
+        };
+      };
+      badges: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          icon: string;
+          condition_type: string;
+          condition_value: number | null;
+          color: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          icon: string;
+          condition_type: string;
+          condition_value?: number | null;
+          color?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          icon?: string;
+          condition_type?: string;
+          condition_value?: number | null;
+          color?: string | null;
+          created_at?: string;
+        };
+      };
+      user_badges: {
+        Row: {
+          id: string;
+          user_id: string;
+          badge_id: string;
+          earned_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          badge_id: string;
+          earned_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          badge_id?: string;
+          earned_at?: string;
         };
       };
     };

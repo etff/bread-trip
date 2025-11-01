@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LogOut, Heart, ChevronRight } from "lucide-react";
+import { LogOut, Heart, ChevronRight, MapPin, Star, Award } from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import AuthModal from "@/components/layout/AuthModal";
 import ReviewCard from "@/components/review/ReviewCard";
+import StatsCard from "@/components/profile/StatsCard";
+import RegionChart from "@/components/profile/RegionChart";
+import BadgeCard from "@/components/profile/BadgeCard";
+import ActivityTimeline, { type Activity } from "@/components/profile/ActivityTimeline";
 import { signOut, getUser } from "@/app/actions/auth";
 import { getFavorites } from "@/app/actions/favorites";
 import type { ReviewWithUser, ReviewWithBakery } from "@/types/common";
@@ -19,6 +23,14 @@ export default function ProfilePage() {
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
 
+  // 새로운 통계 관련 상태
+  const [stats, setStats] = useState<any>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [badgesLoading, setBadgesLoading] = useState(false);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+
   useEffect(() => {
     fetchUser();
   }, []);
@@ -27,6 +39,9 @@ export default function ProfilePage() {
     if (user?.id) {
       fetchUserReviews();
       fetchFavoritesCount();
+      fetchUserStats();
+      fetchUserBadges();
+      fetchUserActivities();
     }
   }, [user?.id]);
 
@@ -68,6 +83,45 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchUserStats = async () => {
+    setStatsLoading(true);
+    try {
+      const response = await fetch("/api/users/stats");
+      const data = await response.json();
+      setStats(data.stats);
+    } catch (error) {
+      console.error("통계 로드 실패:", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  const fetchUserBadges = async () => {
+    setBadgesLoading(true);
+    try {
+      const response = await fetch("/api/users/badges");
+      const data = await response.json();
+      setBadges(data.badges || []);
+    } catch (error) {
+      console.error("배지 로드 실패:", error);
+    } finally {
+      setBadgesLoading(false);
+    }
+  };
+
+  const fetchUserActivities = async () => {
+    setActivitiesLoading(true);
+    try {
+      const response = await fetch("/api/users/activities");
+      const data = await response.json();
+      setActivities(data.activities || []);
+    } catch (error) {
+      console.error("활동 내역 로드 실패:", error);
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
   };
@@ -91,7 +145,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             {/* 프로필 카드 */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center overflow-hidden">
                   {user.profile_image_url ? (
                     <img
@@ -114,50 +168,80 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-800 font-semibold">{user.email}</p>
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <Link
-                  href="/favorites"
-                  className="text-center hover:bg-cream p-2 rounded-lg transition-colors"
-                >
-                  <p className="text-2xl font-bold text-brown">
-                    {favoritesLoading ? "..." : favoritesCount}
-                  </p>
-                  <p className="text-sm text-gray-800 font-bold">찜한 빵집</p>
-                </Link>
-                <div className="text-center p-2">
-                  <p className="text-2xl font-bold text-brown">
-                    {reviewsLoading ? "..." : reviews.length}
-                  </p>
-                  <p className="text-sm text-gray-800 font-bold">작성한 리뷰</p>
+            {/* 통계 카드 그리드 */}
+            {statsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="text-4xl mb-2 animate-bounce">🍞</div>
+                  <p className="text-brown font-medium">통계 로딩 중...</p>
                 </div>
               </div>
-            </div>
+            ) : stats ? (
+              <div className="grid grid-cols-2 gap-4">
+                <StatsCard
+                  icon={MapPin}
+                  label="방문한 빵집"
+                  value={stats.visitedBakeriesCount}
+                  color="#8B4513"
+                />
+                <StatsCard
+                  icon={Star}
+                  label="작성한 리뷰"
+                  value={stats.reviewCount}
+                  color="#D2691E"
+                />
+                <StatsCard
+                  icon={Heart}
+                  label="찜한 빵집"
+                  value={stats.favoritesCount}
+                  color="#EF4444"
+                />
+                <StatsCard
+                  icon={Award}
+                  label="평균 평점"
+                  value={`${stats.averageRating}점`}
+                  color="#F59E0B"
+                />
+              </div>
+            ) : null}
 
-            {/* 작성한 리뷰 섹션 */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-4">작성한 리뷰</h3>
-              {reviewsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-center">
-                    <div className="text-4xl mb-2 animate-bounce">🍞</div>
-                    <p className="text-gray-800 font-medium">로딩 중...</p>
-                  </div>
+            {/* 지역별 분포 차트 */}
+            {!statsLoading && stats && (
+              <RegionChart data={stats.regionDistribution} />
+            )}
+
+            {/* 배지 섹션 */}
+            {badgesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="text-4xl mb-2 animate-bounce">🍞</div>
+                  <p className="text-brown font-medium">배지 로딩 중...</p>
                 </div>
-              ) : reviews.length > 0 ? (
-                <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} showBakery={true} />
+              </div>
+            ) : badges.length > 0 ? (
+              <div className="bg-white rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-brown mb-4">
+                  획득한 배지 ({badges.filter((b) => b.earned).length}/{badges.length})
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {badges.map((badge) => (
+                    <BadgeCard
+                      key={badge.id}
+                      badge={badge}
+                      earned={badge.earned}
+                      earnedAt={badge.earnedAt}
+                    />
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-800 font-semibold">
-                  아직 작성한 리뷰가 없습니다
-                </div>
-              )}
-            </div>
+              </div>
+            ) : null}
 
-            {/* 찜한 빵집 섹션 */}
+            {/* 최근 활동 타임라인 */}
+            {!activitiesLoading && <ActivityTimeline activities={activities} />}
+
+            {/* 찜한 빵집 링크 */}
             <Link
               href="/favorites"
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow block"
@@ -169,7 +253,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex items-center gap-1 text-gray-500">
                   <span className="text-sm font-medium">
-                    {favoritesLoading ? "..." : `${favoritesCount}개`}
+                    {stats ? `${stats.favoritesCount}개` : "..."}
                   </span>
                   <ChevronRight className="w-5 h-5" />
                 </div>

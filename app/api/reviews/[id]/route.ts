@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 export async function PATCH(
   request: Request,
@@ -61,6 +62,11 @@ export async function PATCH(
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // 배지 획득 조건 확인 (비동기로 실행, 결과를 기다리지 않음)
+    checkAndAwardBadges(user.id).catch((err) =>
+      console.error("배지 확인 중 오류:", err)
+    );
 
     return NextResponse.json({ review: data });
   } catch (error) {

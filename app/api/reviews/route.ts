@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import type { ReviewInsert } from "@/types/common";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -108,6 +109,11 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // 배지 획득 조건 확인 (비동기로 실행, 결과를 기다리지 않음)
+    checkAndAwardBadges(user.id).catch((err) =>
+      console.error("배지 확인 중 오류:", err)
+    );
 
     return NextResponse.json({ review: data }, { status: 201 });
   } catch (error) {
