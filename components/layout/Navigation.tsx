@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, Newspaper, User, Tags } from "lucide-react";
+import { Map, Newspaper, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -10,11 +10,6 @@ const navItems = [
     href: "/",
     label: "탐험",
     icon: Map,
-  },
-  {
-    href: "/themes",
-    label: "테마",
-    icon: Tags,
   },
   {
     href: "/feed",
