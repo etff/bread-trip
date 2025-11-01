@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Croissant, Heart } from "lucide-react";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import ReviewModal from "@/components/review/ReviewModal";
 import ReviewCard from "@/components/review/ReviewCard";
 import { getUser } from "@/app/actions/auth";
-import type { Bakery, ReviewWithUser } from "@/types/common";
+import type { BakeryWithThemes, ReviewWithUser } from "@/types/common";
 
 export default function BakeryDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [bakery, setBakery] = useState<Bakery | null>(null);
+  const [bakery, setBakery] = useState<BakeryWithThemes | null>(null);
   const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -172,6 +173,31 @@ export default function BakeryDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* 테마 섹션 */}
+          {bakery.themes && bakery.themes.length > 0 && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-bold text-lg mb-3">테마</h3>
+              <div className="flex flex-wrap gap-2">
+                {bakery.themes.map((theme) => (
+                  <Link
+                    key={theme.id}
+                    href={`/themes/${theme.id}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105"
+                    style={{
+                      backgroundColor: theme.color
+                        ? `${theme.color}20`
+                        : "#f5e6d3",
+                      color: theme.color || "#8B4513",
+                    }}
+                  >
+                    <span>{theme.icon || "🍞"}</span>
+                    <span>{theme.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 리뷰 섹션 */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">

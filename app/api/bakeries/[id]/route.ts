@@ -9,6 +9,7 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
+    // 빵집 정보 조회
     const { data, error } = await supabase
       .from("bakeries")
       .select("*")
@@ -19,7 +20,32 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 404 });
     }
 
-    return NextResponse.json({ bakery: data });
+    // 빵집에 연결된 테마 조회
+    const { data: bakeryThemes } = await (supabase as any)
+      .from("bakery_themes")
+      .select(
+        `
+        theme:themes (
+          id,
+          name,
+          category,
+          icon,
+          color
+        )
+      `
+      )
+      .eq("bakery_id", id);
+
+    const themes = bakeryThemes
+      ?.map((bt: any) => bt.theme)
+      .filter((t: any) => t !== null) || [];
+
+    return NextResponse.json({
+      bakery: {
+        ...data,
+        themes
+      }
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },

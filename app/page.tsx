@@ -5,24 +5,48 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import KakaoMap from "@/components/map/KakaoMap";
 import BottomSheet from "@/components/map/BottomSheet";
+import ThemeFilter from "@/components/map/ThemeFilter";
 import AuthModal from "@/components/layout/AuthModal";
 import { getUser } from "@/app/actions/auth";
-import type { Bakery } from "@/types/common";
+import type { Bakery, Theme } from "@/types/common";
 
 export default function Home() {
   const router = useRouter();
   const [bakeries, setBakeries] = useState<Bakery[]>([]);
+  const [themes, setThemes] = useState<Theme[]>([]);
+  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [selectedBakery, setSelectedBakery] = useState<Bakery | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
+    fetchThemes();
     fetchBakeries();
   }, []);
 
+  useEffect(() => {
+    fetchBakeries();
+  }, [selectedThemeId]);
+
+  const fetchThemes = async () => {
+    try {
+      const response = await fetch("/api/themes");
+      const data = await response.json();
+
+      if (data.themes) {
+        setThemes(data.themes);
+      }
+    } catch (error) {
+      console.error("테마 데이터 로드 실패:", error);
+    }
+  };
+
   const fetchBakeries = async () => {
     try {
-      const response = await fetch("/api/bakeries");
+      const url = selectedThemeId
+        ? `/api/bakeries?theme=${selectedThemeId}`
+        : "/api/bakeries";
+      const response = await fetch(url);
       const data = await response.json();
 
       if (data.bakeries) {
@@ -77,12 +101,25 @@ export default function Home() {
 
       {/* 상단 배너 */}
       <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg mb-3">
           <h1 className="text-xl font-bold text-brown mb-1">빵지순례 🍞</h1>
           <p className="text-sm text-gray-600">
-            서울에 있는 {bakeries.length}개의 빵집을 탐험해보세요
+            {selectedThemeId
+              ? `${bakeries.length}개의 테마별 빵집`
+              : `서울에 있는 ${bakeries.length}개의 빵집을 탐험해보세요`}
           </p>
         </div>
+
+        {/* 테마 필터 */}
+        {themes.length > 0 && (
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl py-3 shadow-lg">
+            <ThemeFilter
+              themes={themes}
+              selectedThemeId={selectedThemeId}
+              onSelectTheme={setSelectedThemeId}
+            />
+          </div>
+        )}
       </div>
 
       {/* 하단 시트 */}

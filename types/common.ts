@@ -9,11 +9,15 @@ export type User = Database["public"]["Tables"]["users"]["Row"];
 export type Bakery = Database["public"]["Tables"]["bakeries"]["Row"];
 export type Review = Database["public"]["Tables"]["reviews"]["Row"];
 export type Favorite = Database["public"]["Tables"]["favorites"]["Row"];
+export type Theme = Database["public"]["Tables"]["themes"]["Row"];
+export type BakeryTheme = Database["public"]["Tables"]["bakery_themes"]["Row"];
 
 // Insert 타입
 export type BakeryInsert = Database["public"]["Tables"]["bakeries"]["Insert"];
 export type ReviewInsert = Database["public"]["Tables"]["reviews"]["Insert"];
 export type FavoriteInsert = Database["public"]["Tables"]["favorites"]["Insert"];
+export type ThemeInsert = Database["public"]["Tables"]["themes"]["Insert"];
+export type BakeryThemeInsert = Database["public"]["Tables"]["bakery_themes"]["Insert"];
 
 // 확장된 타입 (Join 포함)
 export type BakeryWithReviews = Bakery & {
@@ -28,6 +32,15 @@ export type ReviewWithUser = Review & {
 
 export type ReviewWithBakery = Review & {
   bakery: Pick<Bakery, "id" | "name" | "image_url">;
+};
+
+export type BakeryWithThemes = Bakery & {
+  themes: Theme[];
+};
+
+export type ThemeWithBakeries = Theme & {
+  bakeries: Bakery[];
+  bakery_count?: number;
 };
 
 // 좌표 타입
@@ -51,3 +64,6 @@ export type District =
   | "성북"
   | "부암"
   | "기타";
+
+// 테마 카테고리 타입
+export type ThemeCategory = "bread_type" | "atmosphere" | "special";

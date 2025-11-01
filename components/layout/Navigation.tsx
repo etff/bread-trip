@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, Newspaper, User } from "lucide-react";
+import { Map, Newspaper, User, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -10,6 +10,11 @@ const navItems = [
     href: "/",
     label: "탐험",
     icon: Map,
+  },
+  {
+    href: "/themes",
+    label: "테마",
+    icon: Tags,
   },
   {
     href: "/feed",
@@ -31,7 +36,8 @@ export default function Navigation() {
       <div className="max-w-screen-md mx-auto px-4">
         <ul className="flex justify-around items-center h-16">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href));
             const Icon = item.icon;
 
             return (

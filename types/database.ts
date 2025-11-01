@@ -126,6 +126,55 @@ export interface Database {
           created_at?: string;
         };
       };
+      themes: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          category: string;
+          icon: string | null;
+          color: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          category: string;
+          icon?: string | null;
+          color?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          category?: string;
+          icon?: string | null;
+          color?: string | null;
+          created_at?: string;
+        };
+      };
+      bakery_themes: {
+        Row: {
+          id: string;
+          bakery_id: string;
+          theme_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          bakery_id: string;
+          theme_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          bakery_id?: string;
+          theme_id?: string;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

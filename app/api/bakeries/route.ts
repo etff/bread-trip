@@ -8,10 +8,51 @@ export async function GET(request: Request) {
   const lng = searchParams.get("lng");
   const radius = searchParams.get("radius") || "5000"; // 기본 5km
   const district = searchParams.get("district");
+  const themeId = searchParams.get("theme");
 
   try {
     const supabase = await createClient();
 
+    // 테마 필터가 있는 경우 bakery_themes를 통해 조회
+    if (themeId) {
+      const { data: bakeryThemes, error } = await (supabase as any)
+        .from("bakery_themes")
+        .select(
+          `
+          bakery:bakeries (
+            id,
+            name,
+            address,
+            district,
+            lat,
+            lng,
+            signature_bread,
+            description,
+            image_url,
+            created_by,
+            created_at
+          )
+        `
+        )
+        .eq("theme_id", themeId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      let bakeries = bakeryThemes
+        ?.map((bt: any) => bt.bakery)
+        .filter((b: any) => b !== null) || [];
+
+      // 지역 필터 적용
+      if (district && bakeries.length > 0) {
+        bakeries = bakeries.filter((b: any) => b.district === district);
+      }
+
+      return NextResponse.json({ bakeries });
+    }
+
+    // 일반 빵집 목록 조회
     let query = supabase
       .from("bakeries")
       .select("*")
