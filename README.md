@@ -47,18 +47,6 @@
 
 `.env.local` 파일이 이미 생성되어 있습니다:
 
-```bash
-# Supabase (이미 설정됨)
-NEXT_PUBLIC_SUPABASE_URL=https://vetpzzvvdkpjgqdywflb.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
-
-# Kakao Maps (이미 설정됨)
-NEXT_PUBLIC_KAKAO_MAPS_APP_KEY=9c0d85c9de...
-
-# App URL
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
 
 ### 2. Supabase 데이터베이스 설정
 
