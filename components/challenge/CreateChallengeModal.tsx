@@ -62,7 +62,8 @@ export default function CreateChallengeModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="나만의 빵지순례"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent text-gray-900 placeholder:text-gray-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent text-black placeholder:text-gray-400 bg-white"
+            style={{ color: '#000000' }}
           />
         </div>
 
@@ -79,7 +80,8 @@ export default function CreateChallengeModal({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="이 챌린지에 대한 설명을 입력하세요"
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent resize-none text-gray-900 placeholder:text-gray-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent resize-none text-black placeholder:text-gray-400 bg-white"
+            style={{ color: '#000000' }}
           />
         </div>
 
