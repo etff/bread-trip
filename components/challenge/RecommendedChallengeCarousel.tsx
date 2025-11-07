@@ -7,7 +7,7 @@ import type { RecommendedChallenge } from "@/types/common";
 
 interface RecommendedChallengeCarouselProps {
   recommendations: RecommendedChallenge[];
-  onStart: (recommendation: RecommendedChallenge) => void;
+  onStart: (recommendation: RecommendedChallenge) => Promise<void>;
 }
 
 export default function RecommendedChallengeCarousel({
