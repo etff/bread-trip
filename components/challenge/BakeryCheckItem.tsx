@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { ChallengeBakeryWithBakery } from "@/types/common";
 import { MapPin, Star, CheckCircle2, Circle, Trash2 } from "lucide-react";
@@ -68,11 +67,10 @@ export default function BakeryCheckItem({
       <Link href={`/bakeries/${bakery.id}`} className="flex-shrink-0">
         <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
           {bakery.image_url ? (
-            <Image
+            <img
               src={bakery.image_url}
               alt={bakery.name}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-2xl">
