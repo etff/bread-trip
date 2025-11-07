@@ -152,7 +152,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, address, district, lat, lng, signature_bread, image_url } =
+    const { name, address, district, lat, lng, signature_bread, image_url, themeIds } =
       body;
 
     // 필수 필드 검증
@@ -181,8 +181,25 @@ export async function POST(request: Request) {
       .select()
       .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error || !data) {
+      return NextResponse.json({ error: error?.message || "Failed to create bakery" }, { status: 500 });
+    }
+
+    // 테마 연결 (선택된 테마가 있는 경우)
+    if (themeIds && Array.isArray(themeIds) && themeIds.length > 0 && data) {
+      const bakeryThemeData = themeIds.map((themeId: string) => ({
+        bakery_id: (data as any).id,
+        theme_id: themeId,
+      }));
+
+      const { error: themeError } = await (supabase as any)
+        .from("bakery_themes")
+        .insert(bakeryThemeData);
+
+      if (themeError) {
+        console.error("Failed to link themes:", themeError);
+        // 테마 연결 실패해도 빵집은 생성되었으므로 계속 진행
+      }
     }
 
     return NextResponse.json({ bakery: data }, { status: 201 });

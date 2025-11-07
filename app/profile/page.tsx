@@ -260,6 +260,25 @@ export default function ProfilePage() {
               </div>
             </Link>
 
+            {/* 빵지순례 챌린지 링크 */}
+            <Link
+              href="/challenges"
+              className="bg-gradient-to-r from-brown to-brown-dark rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow block"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🎒</span>
+                  <div>
+                    <h3 className="font-bold text-white">빵지순례 챌린지</h3>
+                    <p className="text-xs text-white/80 mt-0.5">
+                      가고 싶은 빵집 목록 만들기
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-white" />
+              </div>
+            </Link>
+
             {/* 로그아웃 버튼 */}
             <Button
               variant="ghost"

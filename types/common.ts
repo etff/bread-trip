@@ -74,3 +74,58 @@ export type District =
 
 // 테마 카테고리 타입
 export type ThemeCategory = "bread_type" | "atmosphere" | "special";
+
+// 챌린지 관련 타입
+export type Challenge = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  is_public: boolean;
+  share_token: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChallengeBakery = {
+  id: string;
+  challenge_id: string;
+  bakery_id: string;
+  order_num: number | null;
+  visited_at: string | null;
+  memo: string | null;
+  created_at: string;
+};
+
+// Insert 타입
+export type ChallengeInsert = Omit<Challenge, "id" | "created_at" | "updated_at"> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ChallengeBakeryInsert = Omit<ChallengeBakery, "id" | "created_at"> & {
+  id?: string;
+  created_at?: string;
+};
+
+// 확장된 타입
+export type ChallengeWithBakeries = Challenge & {
+  bakeries: (ChallengeBakery & {
+    bakery: BakeryWithRating;
+  })[];
+  total_count?: number;
+  visited_count?: number;
+  progress_percentage?: number;
+};
+
+export type ChallengeBakeryWithBakery = ChallengeBakery & {
+  bakery: BakeryWithRating;
+};
+
+export type ChallengeStats = {
+  total_count: number;
+  visited_count: number;
+  progress_percentage: number;
+};

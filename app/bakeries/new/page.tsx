@@ -8,7 +8,7 @@ import Input from "@/components/ui/Input";
 import ImageUpload from "@/components/ui/ImageUpload";
 import BakeryRegistrationMap from "@/components/map/BakeryRegistrationMap";
 import { detectDistrictFromAddress } from "@/lib/utils";
-import type { District } from "@/types/common";
+import type { District, Theme } from "@/types/common";
 
 interface Location {
   lat: number;
@@ -55,6 +55,7 @@ export default function NewBakeryPage() {
     signature_bread: "",
     description: "",
     image_url: "",
+    themeIds: [] as string[],
   });
 
   // 중복 체크
@@ -64,6 +65,29 @@ export default function NewBakeryPage() {
   // 최근 위치
   const [recentLocations, setRecentLocations] = useState<Location[]>([]);
   const [showRecentLocations, setShowRecentLocations] = useState(false);
+
+  // 테마 목록
+  const [themes, setThemes] = useState<Theme[]>([]);
+  const [isLoadingThemes, setIsLoadingThemes] = useState(true);
+
+  // 테마 목록 불러오기
+  useEffect(() => {
+    const fetchThemes = async () => {
+      try {
+        const response = await fetch("/api/themes");
+        const data = await response.json();
+        if (data.themes) {
+          setThemes(data.themes);
+        }
+      } catch (error) {
+        console.error("Failed to load themes:", error);
+      } finally {
+        setIsLoadingThemes(false);
+      }
+    };
+
+    fetchThemes();
+  }, []);
 
   // 최근 위치 불러오기
   useEffect(() => {
@@ -112,6 +136,16 @@ export default function NewBakeryPage() {
 
     // 중복 체크 수행
     checkDuplicates(formData.name, location.lat, location.lng);
+  };
+
+  // 테마 토글 함수
+  const toggleTheme = (themeId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      themeIds: prev.themeIds.includes(themeId)
+        ? prev.themeIds.filter((id) => id !== themeId)
+        : [...prev.themeIds, themeId],
+    }));
   };
 
   // 중복 체크 함수
@@ -419,6 +453,82 @@ export default function NewBakeryPage() {
                 rows={4}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent text-gray-900 resize-none"
               />
+            </div>
+
+            {/* 테마 선택 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                테마 선택 (해시태그)
+              </label>
+              <p className="text-xs text-gray-600 mb-3">
+                이 빵집과 어울리는 테마를 선택해주세요 (중복 선택 가능)
+              </p>
+
+              {isLoadingThemes ? (
+                <div className="text-sm text-gray-500 py-4 text-center">
+                  테마 로딩 중...
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* 카테고리별로 테마 그룹화 */}
+                  {["bread_type", "atmosphere", "special"].map((category) => {
+                    const categoryThemes = themes.filter(
+                      (theme) => theme.category === category
+                    );
+                    if (categoryThemes.length === 0) return null;
+
+                    const categoryNames: Record<string, string> = {
+                      bread_type: "빵 종류",
+                      atmosphere: "분위기",
+                      special: "특별한",
+                    };
+
+                    return (
+                      <div key={category}>
+                        <p className="text-xs font-bold text-gray-700 mb-2 uppercase">
+                          {categoryNames[category]}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {categoryThemes.map((theme) => {
+                            const isSelected = formData.themeIds.includes(
+                              theme.id
+                            );
+                            return (
+                              <button
+                                key={theme.id}
+                                type="button"
+                                onClick={() => toggleTheme(theme.id)}
+                                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                                  isSelected
+                                    ? "ring-2 ring-brown scale-105"
+                                    : "hover:scale-105 opacity-70"
+                                }`}
+                                style={{
+                                  backgroundColor: theme.color
+                                    ? `${theme.color}20`
+                                    : "#f5e6d3",
+                                  color: theme.color || "#8B4513",
+                                }}
+                              >
+                                <span>{theme.icon || "🍞"}</span>
+                                <span>{theme.name}</span>
+                                {isSelected && <span>✓</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* 선택된 테마 개수 표시 */}
+              {formData.themeIds.length > 0 && (
+                <div className="mt-3 text-sm text-gray-600">
+                  선택된 테마: {formData.themeIds.length}개
+                </div>
+              )}
             </div>
 
             {/* 이미지 업로드 */}
