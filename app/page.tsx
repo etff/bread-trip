@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Map, Grid } from "lucide-react";
 import MapView from "@/components/explore/MapView";
 import ThemesView from "@/components/explore/ThemesView";
@@ -8,7 +9,9 @@ import type { BakeryWithRating, Theme } from "@/types/common";
 
 type TabType = "map" | "themes";
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get("challenge");
   const [activeTab, setActiveTab] = useState<TabType>("themes");
   const [bakeries, setBakeries] = useState<BakeryWithRating[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -17,6 +20,13 @@ export default function Home() {
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    // 챌린지 ID가 있으면 지도 탭으로 전환
+    if (challengeId) {
+      setActiveTab("map");
+    }
+  }, [challengeId]);
 
   const fetchInitialData = async () => {
     try {
@@ -88,7 +98,11 @@ export default function Home() {
       {/* 탭 컨텐츠 */}
       <div className="flex-1 overflow-hidden">
         {activeTab === "map" ? (
-          <MapView initialBakeries={bakeries} initialThemes={themes} />
+          <MapView
+            initialBakeries={bakeries}
+            initialThemes={themes}
+            challengeId={challengeId || undefined}
+          />
         ) : (
           <div className="h-full overflow-y-auto">
             <ThemesView initialThemes={themes} />
@@ -96,5 +110,22 @@ export default function Home() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen w-full flex items-center justify-center bg-cream">
+          <div className="text-center">
+            <div className="text-4xl mb-2 animate-bounce">🍞</div>
+            <p className="text-brown font-medium">빵집을 찾는 중...</p>
+          </div>
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }

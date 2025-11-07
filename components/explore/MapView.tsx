@@ -13,9 +13,10 @@ import type { Bakery, BakeryWithRating, Theme } from "@/types/common";
 interface MapViewProps {
   initialBakeries: BakeryWithRating[];
   initialThemes: Theme[];
+  challengeId?: string;
 }
 
-export default function MapView({ initialBakeries, initialThemes }: MapViewProps) {
+export default function MapView({ initialBakeries, initialThemes, challengeId }: MapViewProps) {
   const router = useRouter();
   const [bakeries, setBakeries] = useState<BakeryWithRating[]>(initialBakeries);
   const [themes] = useState<Theme[]>(initialThemes);
@@ -100,6 +101,7 @@ export default function MapView({ initialBakeries, initialThemes }: MapViewProps
         bakery={selectedBakery}
         onClose={() => setSelectedBakery(null)}
         onViewDetail={handleViewDetail}
+        challengeId={challengeId}
       />
 
       {/* FAB - 빵집 등록 버튼 */}

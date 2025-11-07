@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, MapPin, Croissant, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { X, MapPin, Croissant, Heart, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BakeryWithRating } from "@/types/common";
 import Button from "@/components/ui/Button";
@@ -13,16 +14,21 @@ interface BottomSheetProps {
   bakery: BakeryWithRating | null;
   onClose: () => void;
   onViewDetail: (bakery: BakeryWithRating) => void;
+  challengeId?: string;
 }
 
 export default function BottomSheet({
   bakery,
   onClose,
   onViewDetail,
+  challengeId,
 }: BottomSheetProps) {
+  const router = useRouter();
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAddingToChallenge, setIsAddingToChallenge] = useState(false);
+  const [isAddedToChallenge, setIsAddedToChallenge] = useState(false);
 
   useEffect(() => {
     if (bakery) {
@@ -75,6 +81,39 @@ export default function BottomSheet({
       }
     } finally {
       setIsLoadingFavorite(false);
+    }
+  };
+
+  const handleAddToChallenge = async () => {
+    if (!bakery || !challengeId || isAddingToChallenge) return;
+
+    setIsAddingToChallenge(true);
+
+    try {
+      const response = await fetch(`/api/challenges/${challengeId}/bakeries`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bakery_id: bakery.id,
+        }),
+      });
+
+      if (response.ok) {
+        setIsAddedToChallenge(true);
+        setTimeout(() => {
+          router.push(`/challenges/${challengeId}`);
+        }, 1000);
+      } else {
+        const data = await response.json();
+        alert(data.error || "챌린지에 추가하지 못했습니다.");
+      }
+    } catch (error) {
+      console.error("Failed to add to challenge:", error);
+      alert("오류가 발생했습니다.");
+    } finally {
+      setIsAddingToChallenge(false);
     }
   };
 
@@ -200,6 +239,30 @@ export default function BottomSheet({
 
           {/* Actions */}
           <div className="space-y-3">
+            {challengeId && (
+              <Button
+                className="w-full"
+                onClick={handleAddToChallenge}
+                disabled={isAddingToChallenge || isAddedToChallenge}
+              >
+                {isAddedToChallenge ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    추가 완료!
+                  </>
+                ) : isAddingToChallenge ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    추가 중...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    챌린지에 추가
+                  </>
+                )}
+              </Button>
+            )}
             <div className="flex gap-3">
               <Button
                 variant="secondary"
@@ -218,7 +281,7 @@ export default function BottomSheet({
                 리뷰보기
               </Button>
             </div>
-            {isLoggedIn && (
+            {isLoggedIn && !challengeId && (
               <Button
                 variant="outline"
                 className="w-full"

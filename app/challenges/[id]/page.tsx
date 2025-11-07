@@ -203,7 +203,7 @@ export default function ChallengeDetailPage({
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-brown">빵집 목록</h2>
             <Link
-              href={`/bakeries?challenge=${id}`}
+              href={`/?challenge=${id}`}
               className="flex items-center gap-2 text-sm bg-brown text-white px-4 py-2 rounded-lg hover:bg-brown-dark transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -218,7 +218,7 @@ export default function ChallengeDetailPage({
                 아직 빵집이 없습니다. 빵집을 추가해보세요!
               </p>
               <Link
-                href={`/bakeries?challenge=${id}`}
+                href={`/?challenge=${id}`}
                 className="inline-flex items-center gap-2 bg-brown text-white px-6 py-3 rounded-lg hover:bg-brown-dark transition-colors"
               >
                 <Plus className="w-4 h-4" />
