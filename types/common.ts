@@ -139,3 +139,29 @@ export type RecommendedChallenge = {
   bakeries: BakeryWithRating[];
   difficulty: "쉬움" | "보통" | "어려움";
 };
+
+// 찜목록 관련 타입
+export type FavoriteList = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  is_public: boolean;
+  share_token: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FavoriteListInsert = Omit<FavoriteList, "id" | "created_at" | "updated_at"> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type FavoriteListWithBakeries = FavoriteList & {
+  favorites: (Favorite & {
+    bakery: BakeryWithRating;
+  })[];
+  bakery_count?: number;
+  user?: Pick<User, "id" | "nickname" | "profile_image_url">;
+};
