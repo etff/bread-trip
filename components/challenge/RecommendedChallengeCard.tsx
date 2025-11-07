@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import type { RecommendedChallenge } from "@/types/common";
 import { MapPin, Star, Sparkles } from "lucide-react";
 
@@ -74,11 +73,10 @@ export default function RecommendedChallengeCard({
               className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 group"
             >
               {bakery.image_url ? (
-                <Image
+                <img
                   src={bakery.image_url}
                   alt={bakery.name}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl">
