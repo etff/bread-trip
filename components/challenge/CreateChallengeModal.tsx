@@ -53,7 +53,7 @@ export default function CreateChallengeModal({
     <Modal isOpen={true} onClose={onClose} title="새 챌린지 만들기">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-1">
             챌린지 이름
           </label>
           <input
@@ -62,14 +62,14 @@ export default function CreateChallengeModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="나만의 빵지순례"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent text-gray-900 placeholder:text-gray-500"
           />
         </div>
 
         <div>
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-900 mb-1"
           >
             설명 (선택)
           </label>
@@ -79,7 +79,7 @@ export default function CreateChallengeModal({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="이 챌린지에 대한 설명을 입력하세요"
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent resize-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brown focus:border-transparent resize-none text-gray-900 placeholder:text-gray-500"
           />
         </div>
 
@@ -91,7 +91,7 @@ export default function CreateChallengeModal({
             onChange={(e) => setIsPublic(e.target.checked)}
             className="w-4 h-4 text-brown border-gray-300 rounded focus:ring-brown"
           />
-          <label htmlFor="isPublic" className="text-sm text-gray-700">
+          <label htmlFor="isPublic" className="text-sm text-gray-900">
             다른 사람들과 공유하기
           </label>
         </div>
@@ -106,14 +106,14 @@ export default function CreateChallengeModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             disabled={loading}
           >
             취소
           </button>
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-brown text-white rounded-lg hover:bg-brown-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-2 bg-brown text-white rounded-lg hover:bg-brown-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             disabled={loading}
           >
             {loading ? "생성 중..." : "생성하기"}
