@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ChallengeCard from "./ChallengeCard";
 import CreateChallengeModal from "./CreateChallengeModal";
-import RecommendedChallengeCard from "./RecommendedChallengeCard";
+import RecommendedChallengeCarousel from "./RecommendedChallengeCarousel";
 import type { ChallengeWithBakeries, RecommendedChallenge } from "@/types/common";
 import { Sparkles } from "lucide-react";
 
@@ -128,15 +128,10 @@ export default function ChallengeList() {
             <Sparkles className="w-5 h-5 text-yellow-500" />
             <h3 className="text-xl font-bold text-brown">이번 주 추천 챌린지</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recommendations.map((recommendation) => (
-              <RecommendedChallengeCard
-                key={recommendation.id}
-                recommendation={recommendation}
-                onStart={handleStartRecommendation}
-              />
-            ))}
-          </div>
+          <RecommendedChallengeCarousel
+            recommendations={recommendations}
+            onStart={handleStartRecommendation}
+          />
         </div>
       )}
 
