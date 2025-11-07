@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function ChallengesPage() {
   return (
     <main className="min-h-screen bg-cream">
-      <div className="container max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-screen-md mx-auto px-4 py-8">
         <ChallengeList />
       </div>
     </main>
