@@ -129,3 +129,13 @@ export type ChallengeStats = {
   visited_count: number;
   progress_percentage: number;
 };
+
+// 추천 챌린지 타입
+export type RecommendedChallenge = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  bakeries: BakeryWithRating[];
+  difficulty: "쉬움" | "보통" | "어려움";
+};
