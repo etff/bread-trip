@@ -33,11 +33,11 @@ export default function BadgeCard({ badge, earned = false, earnedAt }: BadgeCard
       <div className="flex flex-col items-center gap-2 text-center">
         <div
           className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl ${
-            earned ? "bg-opacity-20" : "grayscale"
+            earned ? "" : "grayscale"
           }`}
           style={
             earned && badge.color
-              ? { backgroundColor: `${badge.color}20` }
+              ? { backgroundColor: badge.color }
               : undefined
           }
         >
