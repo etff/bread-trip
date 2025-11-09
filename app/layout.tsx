@@ -15,10 +15,6 @@ export const metadata: Metadata = {
   title: "빵지순례 | 서울 빵집 탐험",
   description: "서울의 빵집을 탐험하고, 나만의 빵지도를 채워가는 따뜻한 탐방 서비스",
   keywords: ["빵집", "베이커리", "서울", "빵순이", "맛집", "카페"],
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
   openGraph: {
     title: "빵지순례",
     description: "서울의 빵집을 탐험하고, 나만의 빵지도를 채워가세요",

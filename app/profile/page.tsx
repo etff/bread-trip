@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LogOut, Heart, ChevronRight, MapPin, Star, Award } from "lucide-react";
+import { LogOut, Heart, ChevronRight, MapPin, Star, Award, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import AuthModal from "@/components/layout/AuthModal";
@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [statsLoading, setStatsLoading] = useState(false);
   const [badges, setBadges] = useState<any[]>([]);
   const [badgesLoading, setBadgesLoading] = useState(false);
+  const [badgesRechecking, setBadgesRechecking] = useState(false);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
 
@@ -119,6 +120,32 @@ export default function ProfilePage() {
       console.error("활동 내역 로드 실패:", error);
     } finally {
       setActivitiesLoading(false);
+    }
+  };
+
+  const handleBadgeRecheck = async () => {
+    setBadgesRechecking(true);
+    try {
+      const response = await fetch("/api/users/badges/recheck", {
+        method: "POST",
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // 배지 다시 불러오기
+        await fetchUserBadges();
+
+        if (data.awardedBadgesCount > 0) {
+          alert(`${data.awardedBadgesCount}개의 새로운 배지를 획득했습니다!`);
+        } else {
+          alert("이미 모든 획득 가능한 배지를 받았습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("배지 재체크 실패:", error);
+      alert("배지 재체크 중 오류가 발생했습니다.");
+    } finally {
+      setBadgesRechecking(false);
     }
   };
 
@@ -241,9 +268,19 @@ export default function ProfilePage() {
               </div>
             ) : badges.length > 0 ? (
               <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-brown mb-4">
-                  획득한 배지 ({badges.filter((b) => b.earned).length}/{badges.length})
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-brown">
+                    획득한 배지 ({badges.filter((b) => b.earned).length}/{badges.length})
+                  </h3>
+                  <button
+                    onClick={handleBadgeRecheck}
+                    disabled={badgesRechecking}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-brown hover:text-brown-dark bg-cream hover:bg-cream/80 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${badgesRechecking ? "animate-spin" : ""}`} />
+                    {badgesRechecking ? "확인 중..." : "재체크"}
+                  </button>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   {badges.map((badge) => (
                     <BadgeCard
