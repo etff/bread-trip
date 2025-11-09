@@ -275,10 +275,10 @@ export default function ProfilePage() {
                   <button
                     onClick={handleBadgeRecheck}
                     disabled={badgesRechecking}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-brown hover:text-brown-dark bg-cream hover:bg-cream/80 rounded-lg transition-colors disabled:opacity-50"
+                    className="p-2 text-brown hover:text-brown-dark bg-cream hover:bg-cream/80 rounded-lg transition-colors disabled:opacity-50"
+                    title={badgesRechecking ? "확인 중..." : "배지 재체크"}
                   >
-                    <RefreshCw className={`w-3 h-3 ${badgesRechecking ? "animate-spin" : ""}`} />
-                    {badgesRechecking ? "확인 중..." : "재체크"}
+                    <RefreshCw className={`w-4 h-4 ${badgesRechecking ? "animate-spin" : ""}`} />
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
